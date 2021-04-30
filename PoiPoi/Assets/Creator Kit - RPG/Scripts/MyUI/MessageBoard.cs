@@ -1,12 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPGM.UI
 {
     /// <summary>
-    /// ƒƒbƒZ[ƒW•\¦UI
-    /// ‚Æ‚è‚ ‚¦‚¸ƒVƒ“ƒOƒ‹ƒgƒ“
+    /// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸è¡¨ç¤ºUI
+    /// ã¨ã‚Šã‚ãˆãšã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³
     /// </summary>
     public class MessageBoard : MonoBehaviour
     {
@@ -22,7 +22,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// •\¦‚·‚é
+        /// è¡¨ç¤ºã™ã‚‹
         /// </summary>
         /// <param name="text"></param>
         public static void Show(string text, bool next = false)
@@ -33,7 +33,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ”ñ•\¦‚É‚·‚é
+        /// éè¡¨ç¤ºã«ã™ã‚‹
         /// </summary>
         public static void Hide()
         {

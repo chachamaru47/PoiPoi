@@ -1,4 +1,4 @@
-using RPGM.Core;
+ï»¿using RPGM.Core;
 using RPGM.Gameplay;
 using RPGM.UI;
 using UnityEngine;
@@ -7,7 +7,7 @@ using UnityEngine;
 namespace RPGM.Gameplay
 {
     /// <summary>
-    /// ‚²‚İ” 
+    /// ã”ã¿ç®±
     /// </summary>
     [ExecuteInEditMode]
     [RequireComponent(typeof(BoxCollider2D))]
@@ -19,35 +19,35 @@ namespace RPGM.Gameplay
 
         public void OnTriggerEnter2D(Collider2D collider)
         {
-            // ƒAƒCƒeƒ€‚Æ“–‚½‚Á‚½
+            // ã‚¢ã‚¤ãƒ†ãƒ ã¨å½“ãŸã£ãŸæ™‚
             var item = collider.GetComponent<DropItem>();
             if (item != null)
             {
-                // ƒAƒCƒeƒ€¶¬‚É“–‚½‚Á‚½‚Í‰Á“_ˆ—‚µ‚È‚¢‚æ‚¤‚É
+                // ã‚¢ã‚¤ãƒ†ãƒ ç”Ÿæˆæ™‚ã«å½“ãŸã£ãŸã¯åŠ ç‚¹å‡¦ç†ã—ãªã„ã‚ˆã†ã«
                 if (model.gameManager.GamePhase!= GameManager.GamePhaseType.Opening)
                 {
-                    // ‰Á“_ˆ—
+                    // åŠ ç‚¹å‡¦ç†
 
-                    // Šî‘b“_*”ò‹——£‚ª“_”
+                    // åŸºç¤ç‚¹*é£›è·é›¢ãŒç‚¹æ•°
                     float distance = item.GetFlyingDistance();
                     int score = (int)(item.data.score * distance);
-                    // ‰Á“_
+                    // åŠ ç‚¹
                     model.gameManager.AddScore(score);
-                    // ‹L˜^XV”»’è
+                    // è¨˜éŒ²æ›´æ–°åˆ¤å®š
                     if (model.gameManager.UpdateRecord(distance))
                     {
-                        // ‹L˜^XV‚ª‚ ‚Á‚½
+                        // è¨˜éŒ²æ›´æ–°ãŒã‚ã£ãŸ
                         MessageBar.Show($"New Record !!!!  Distance:{distance.ToString("0.00")}m");
                     }
-                    // Œø‰Ê‰¹Ä¶
+                    // åŠ¹æœéŸ³å†ç”Ÿ
                     UserInterfaceAudio.OnCollect();
-                    // “_”ƒGƒtƒFƒNƒg‚ğ¶¬
+                    // ç‚¹æ•°ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆ
                     var eff = Instantiate(pointEffect, collider.transform.position, Quaternion.identity);
                     eff.gameObject.transform.SetParent(transform);
                     eff.textMeshPro.text = score.ToString();
                 }
 
-                // ƒAƒCƒeƒ€‚Ííœ
+                // ã‚¢ã‚¤ãƒ†ãƒ ã¯å‰Šé™¤
                 Destroy(collider.gameObject);
             }
         }

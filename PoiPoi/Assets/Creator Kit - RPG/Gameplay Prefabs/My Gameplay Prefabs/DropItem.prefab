@@ -149,9 +149,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 459f2c9eeb57b4e4b8ec16f705be82c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  count: 1
-  sprite: {fileID: 0}
-  animatorController: {fileID: 0}
   data: {fileID: 11400000, guid: 572e7f664c561ed489159a69d4ae3877, type: 2}
   body: {fileID: 1715360440390305271}
   shadow: {fileID: 4613898557985698379}
@@ -184,7 +181,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 1
+  m_LinearDrag: 0.2
   m_AngularDrag: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}

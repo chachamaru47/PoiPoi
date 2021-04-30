@@ -1,4 +1,4 @@
-using RPGM.Core;
+ï»¿using RPGM.Core;
 using RPGM.Gameplay;
 using RPGM.UI;
 using UnityEngine;
@@ -7,7 +7,7 @@ using UnityEngine;
 namespace RPGM.Gameplay
 {
     /// <summary>
-    /// ‚²‚İƒAƒCƒeƒ€
+    /// ã”ã¿ã‚¢ã‚¤ãƒ†ãƒ 
     /// </summary>
     [ExecuteInEditMode]
     [RequireComponent(typeof(Rigidbody2D), typeof(CircleCollider2D))]
@@ -31,7 +31,7 @@ namespace RPGM.Gameplay
 
         void OnEnable()
         {
-            // ƒAƒCƒeƒ€ƒf[ƒ^‚©‚ç‰æ‘œ‚ğİ’è
+            // ã‚¢ã‚¤ãƒ†ãƒ ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ç”»åƒã‚’è¨­å®š
             if (body != null)
             {
                 body.sprite = data.sprite;
@@ -47,50 +47,52 @@ namespace RPGM.Gameplay
                 }
             }
 
-            // Œ»İ‚ÌeƒIƒuƒWƒFƒNƒg‚ğŒÌ‹½‚Éİ’è
+            GetComponent<Rigidbody2D>().mass = data.mass;
+
+            // ç¾åœ¨ã®è¦ªã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æ•…éƒ·ã«è¨­å®š
             oldHome = transform.parent?.gameObject;
         }
 
         /// <summary>
-        /// E‚í‚ê‚é
+        /// æ‹¾ã‚ã‚Œã‚‹
         /// </summary>
         public void PicItem()
         {
-            // E‚í‚ê‚Ä‚¢‚éŠÔ“–‚½‚è”»’è‚ÍÁ‚µ‚Ä‚¨‚­
+            // æ‹¾ã‚ã‚Œã¦ã„ã‚‹é–“å½“ãŸã‚Šåˆ¤å®šã¯æ¶ˆã—ã¦ãŠã
             GetComponent<CircleCollider2D>().enabled = false;
-            // E‚í‚ê‚Ä‚¢‚éŠÔ‰e‚àÁ‚µ‚Ä‚¨‚­
+            // æ‹¾ã‚ã‚Œã¦ã„ã‚‹é–“å½±ã‚‚æ¶ˆã—ã¦ãŠã
             shadow.gameObject.SetActive(false);
-            // ƒLƒƒƒ‰ƒNƒ^[‚æ‚èè‘O‚É
+            // ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã‚ˆã‚Šæ‰‹å‰ã«
             body.sortingOrder = 1;
-            // •¨—‹““®ƒIƒt
+            // ç‰©ç†æŒ™å‹•ã‚ªãƒ•
             GetComponent<Rigidbody2D>().simulated = false;
-            // “ŠËŠJnˆÊ’u‚ğƒNƒŠƒA
+            // æŠ•å°„é–‹å§‹ä½ç½®ã‚’ã‚¯ãƒªã‚¢
             throwStartPos = null;
 
             UserInterfaceAudio.OnPic();
         }
 
         /// <summary>
-        /// “Š‚°‚ç‚ê‚é
+        /// æŠ•ã’ã‚‰ã‚Œã‚‹
         /// </summary>
-        /// <param name="force">“Š‚°‚ç‚ê‚é—Í</param>
-        /// <param name="above_ground">ŠJn‚Ì’n–Ê‚©‚ç‚Ì‚‚³</param>
+        /// <param name="force">æŠ•ã’ã‚‰ã‚Œã‚‹åŠ›</param>
+        /// <param name="above_ground">é–‹å§‹æ™‚ã®åœ°é¢ã‹ã‚‰ã®é«˜ã•</param>
         public void ThrowItem(Vector2 force, float above_ground)
         {
-            // ’n–Ê‚©‚ç‚Ì‚‚³‚ğİ’è
+            // åœ°é¢ã‹ã‚‰ã®é«˜ã•ã‚’è¨­å®š
             aboveGround = above_ground;
-            // ƒ[ƒ‹ƒhÀ•W‚Í‚‚³‚ğl—¶‚µ‚È‚¢ˆÊ’u‚É‚µ‚½‚¢‚Ì‚Å’n–Ê‚©‚ç‚Ì‚‚³‚ğˆø‚¢‚½À•W‚Éİ’è
+            // ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã¯é«˜ã•ã‚’è€ƒæ…®ã—ãªã„ä½ç½®ã«ã—ãŸã„ã®ã§åœ°é¢ã‹ã‚‰ã®é«˜ã•ã‚’å¼•ã„ãŸåº§æ¨™ã«è¨­å®š
             transform.position = new Vector3(transform.position.x, transform.position.y - above_ground, transform.position.z);
-            // “ŠËŠJnˆÊ’u‚ğİ’è
+            // æŠ•å°„é–‹å§‹ä½ç½®ã‚’è¨­å®š
             throwStartPos = transform.position;
-            // ”ò‚Î‚·ˆ—ŠJn
+            // é£›ã°ã™å‡¦ç†é–‹å§‹
             StartCoroutine(FlyingCoroutine(force));
         }
 
         /// <summary>
-        /// ”ò‹——£‚ğæ“¾‚·‚é
+        /// é£›è·é›¢ã‚’å–å¾—ã™ã‚‹
         /// </summary>
-        /// <returns>”ò‹——£</returns>
+        /// <returns>é£›è·é›¢</returns>
         public float GetFlyingDistance()
         {
             if (throwStartPos != null)
@@ -101,68 +103,81 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
-        /// ”ò‚Î‚·ˆ—‚ÌƒRƒ‹[ƒ`ƒ“
+        /// é£›ã°ã™å‡¦ç†ã®ã‚³ãƒ«ãƒ¼ãƒãƒ³
         /// </summary>
-        /// <param name="force">”ò‚Î‚·—Í</param>
+        /// <param name="force">é£›ã°ã™åŠ›</param>
         /// <returns>IEnumerator</returns>
         private System.Collections.IEnumerator FlyingCoroutine(Vector2 force)
         {
-            // ŒÌ‹½ƒIƒuƒWƒFƒNƒg‚ÌqƒIƒuƒWƒFƒNƒg‚É–ß‚·
+            // æ•…éƒ·ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«æˆ»ã™
             transform.SetParent(oldHome.transform);
-            // ‰e‚ğƒIƒ“
+            // å½±ã‚’ã‚ªãƒ³
             shadow.gameObject.SetActive(true);
-            // Œ³‚Ì•`‰æ‡‚É–ß‚·
+            // å…ƒã®æç”»é †ã«æˆ»ã™
             body.sortingOrder = 0;
+            // çµµã‚’é£›ã¶æ–¹å‘ã«å‘ã‘ã‚‹
+            body.flipX = (force.x > 0.0f);
 
-            // •¨—‹““®ŠJn‚µ‚Ä—Í‚ğ‰Á‚¦‚é
+            // ç‰©ç†æŒ™å‹•é–‹å§‹ã—ã¦åŠ›ã‚’åŠ ãˆã‚‹
             var rigidbody = GetComponent<Rigidbody2D>();
             rigidbody.simulated = true;
             rigidbody.AddForce(force, ForceMode2D.Impulse);
 
-            // ‹ó’†‚É‚¢‚éŠÔ‚Ìƒ‹[ƒv
+            // ç©ºä¸­ã«ã„ã‚‹é–“ã®ãƒ«ãƒ¼ãƒ—
             float flying_time = 0.0f;
             float start_ag = aboveGround;
             bool camera_focus = false;
+            bool camera_out_focus = false;
             while (aboveGround > 0.0f)
             {
-                // –{‘Ì‚Ìƒ[ƒJƒ‹À•W‚ğ’n–Ê‚©‚ç‚Ì‚‚³•ªã‚°‚é
+                // æœ¬ä½“ã®ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™ã‚’åœ°é¢ã‹ã‚‰ã®é«˜ã•åˆ†ä¸Šã’ã‚‹
                 body.transform.localPosition = new Vector3(0.0f, aboveGround, 0.0f);
-                // “K“–‚É‚®[‚é‚®‚é
-                body.transform.Rotate(new Vector3(0.0f, 0.0f, 720.0f * Time.deltaTime));
+                // é©å½“ã«ããƒ¼ã‚‹ãã‚‹
+                body.transform.Rotate(new Vector3(0.0f, 0.0f, ((force.x > 0.0f) ? -data.rotateSpeed : data.rotateSpeed) * Time.deltaTime));
 
-                // ‚‚³‚ÌXVAŒvZ®‚Íb’è
+                // é«˜ã•ã®æ›´æ–°ã€è¨ˆç®—å¼ã¯æš«å®š
                 flying_time += Time.deltaTime;
-                if (flying_time < 1.0f)
+                if (flying_time < data.flyingTime)
                 {
-                    // ‚Æ‚è‚ ‚¦‚¸1•bŠÔ‚ÍsinƒJ[ƒu‚ğ•`‚¢‚Äã‰º
-                    aboveGround = start_ag + Mathf.Sin(flying_time * Mathf.PI) * 2.0f;
+                    // ã¨ã‚Šã‚ãˆãš1ç§’é–“ã¯sinã‚«ãƒ¼ãƒ–ã‚’æã„ã¦ä¸Šä¸‹
+                    aboveGround = start_ag + Mathf.Sin(flying_time / data.flyingTime * Mathf.PI) * data.flyingHeight;
                 }
                 else
                 {
-                    // ˆÈ~‚Íˆê’è‘¬“x‚Å—‰º
+                    // ä»¥é™ã¯ä¸€å®šé€Ÿåº¦ã§è½ä¸‹
                     aboveGround -= 5.0f * Time.deltaTime;
                 }
 
-                // ”ò‹——£‚ª‘å‚«‚­‚È‚Á‚½‚ç‚±‚ÌƒAƒCƒeƒ€‚ÉƒtƒH[ƒJƒX‚ğˆÚ‚µ‚ÄƒJƒƒ‰‚ğˆø‚­
+                // é£›è·é›¢ãŒå¤§ãããªã£ãŸã‚‰ã“ã®ã‚¢ã‚¤ãƒ†ãƒ ã«ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã‚’ç§»ã—ã¦ã‚«ãƒ¡ãƒ©ã‚’å¼•ã
                 if(!camera_focus && GetFlyingDistance() > 5.0f)
                 {
                     camera_focus = true;
                     model.cameraController.SetFocus(transform);
                 }
+                // é£›è·é›¢ãŒå¤§ãããªã‚Šã™ããŸæ™‚ã“ã®ã‚¢ã‚¤ãƒ†ãƒ ã‚’ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã—ãŸã¾ã¾ã ã£ãŸã‚‰ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã‚’ãŠè¿”ã—ã™ã‚‹
+                if (!camera_out_focus && GetFlyingDistance() > 30.0f)
+                {
+                    camera_out_focus = true;
+                    if (model.cameraController.IsTargetFocus(transform))
+                    {
+                        model.cameraController.ResetFocus();
+                    }
+                }
+                Debug.Log(GetFlyingDistance());
 
                 yield return null;
             }
 
-            // ’n–Ê‚É’…‚¢‚½
+            // åœ°é¢ã«ç€ã„ãŸ
 
-            // ‚‚³‚â‚ç—Í‚â‚ç‚ğƒNƒŠƒA
+            // é«˜ã•ã‚„ã‚‰åŠ›ã‚„ã‚‰ã‚’ã‚¯ãƒªã‚¢
             aboveGround = 0.0f;
             body.transform.localPosition = Vector3.zero;
             body.transform.localRotation = Quaternion.identity;
             rigidbody.velocity = Vector2.zero;
-            // “–‚½‚è”»’è‚ğƒIƒ“
+            // å½“ãŸã‚Šåˆ¤å®šã‚’ã‚ªãƒ³
             GetComponent<CircleCollider2D>().enabled = true;
-            // ƒJƒƒ‰‚ÌƒtƒH[ƒJƒX‚ª‚±‚ÌƒAƒCƒeƒ€‚ÉˆÚ‚Á‚½‚Ü‚Ü‚¾‚Á‚½‚çƒtƒH[ƒJƒX‚ğ‚¨•Ô‚µ‚·‚é
+            // ã‚«ãƒ¡ãƒ©ãŒã“ã®ã‚¢ã‚¤ãƒ†ãƒ ã‚’ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã—ãŸã¾ã¾ã ã£ãŸã‚‰ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã‚’ãŠè¿”ã—ã™ã‚‹
             if(model.cameraController.IsTargetFocus(transform))
             {
                 model.cameraController.ResetFocus();

@@ -1,12 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPGM.UI
 {
     /// <summary>
-    /// ƒ^ƒCƒ}[•\¦UI
-    /// ‚Æ‚è‚ ‚¦‚¸ƒVƒ“ƒOƒ‹ƒgƒ“
+    /// ã‚¿ã‚¤ãƒãƒ¼è¡¨ç¤ºUI
+    /// ã¨ã‚Šã‚ãˆãšã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³
     /// </summary>
     public class Timer : MonoBehaviour
     {
@@ -21,7 +21,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// •\¦‚·‚é
+        /// è¡¨ç¤ºã™ã‚‹
         /// </summary>
         public static void Show()
         {
@@ -29,7 +29,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ”ñ•\¦‚É‚·‚é
+        /// éè¡¨ç¤ºã«ã™ã‚‹
         /// </summary>
         public static void Hide()
         {
@@ -37,14 +37,14 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// •\¦ŠÔ‚ğİ’è
+        /// è¡¨ç¤ºæ™‚é–“ã‚’è¨­å®š
         /// </summary>
-        /// <param name="time">ŠÔAƒ}ƒCƒiƒX’l‚Å–³§ŒÀ</param>
+        /// <param name="time">æ™‚é–“ã€ãƒã‚¤ãƒŠã‚¹å€¤ã§ç„¡åˆ¶é™</param>
         public static void SetTime(float time)
         {
             if (time < 0.0f)
             {
-                // –³§ŒÀ
+                // ç„¡åˆ¶é™
                 instance.textMeshProUGUI.text = "INF";
             }
             else

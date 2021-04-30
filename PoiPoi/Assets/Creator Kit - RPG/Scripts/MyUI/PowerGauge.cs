@@ -1,11 +1,11 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPGM.UI
 {
     /// <summary>
-    /// ƒpƒ[ƒQ[ƒWUI
+    /// ãƒ‘ãƒ¯ãƒ¼ã‚²ãƒ¼ã‚¸UI
     /// </summary>
     public class PowerGauge : MonoBehaviour
     {
@@ -20,7 +20,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// •\¦‚·‚é
+        /// è¡¨ç¤ºã™ã‚‹
         /// </summary>
         public void Show()
         {
@@ -28,7 +28,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ƒQ[ƒW—Ê‚ğİ’è‚µ‚½‚¤‚¦‚Å•\¦‚·‚é
+        /// ã‚²ãƒ¼ã‚¸é‡ã‚’è¨­å®šã—ãŸã†ãˆã§è¡¨ç¤ºã™ã‚‹
         /// </summary>
         /// <param name="power_ratio"></param>
         public void Show(float power_ratio)
@@ -38,7 +38,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ”ñ•\¦‚É‚·‚é
+        /// éè¡¨ç¤ºã«ã™ã‚‹
         /// </summary>
         public void Hide()
         {
@@ -46,9 +46,9 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ŠÔ·‚Å”ñ•\¦‚É‚·‚é
+        /// æ™‚é–“å·®ã§éè¡¨ç¤ºã«ã™ã‚‹
         /// </summary>
-        /// <param name="delay">’x‚ç‚¹‚éŠÔ</param>
+        /// <param name="delay">é…ã‚‰ã›ã‚‹æ™‚é–“</param>
         public void Hide(float delay)
         {
             Invoke("Hide", delay);

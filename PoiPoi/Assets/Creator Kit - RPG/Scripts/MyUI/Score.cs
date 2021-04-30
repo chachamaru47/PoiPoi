@@ -1,12 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPGM.UI
 {
     /// <summary>
-    /// ƒXƒRƒA•\¦UI
-    /// ‚Æ‚è‚ ‚¦‚¸ƒVƒ“ƒOƒ‹ƒgƒ“
+    /// ã‚¹ã‚³ã‚¢è¡¨ç¤ºUI
+    /// ã¨ã‚Šã‚ãˆãšã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³
     /// </summary>
     public class Score : MonoBehaviour
     {
@@ -21,7 +21,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// •\¦‚·‚é
+        /// è¡¨ç¤ºã™ã‚‹
         /// </summary>
         public static void Show()
         {
@@ -29,7 +29,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ”ñ•\¦‚É‚·‚é
+        /// éè¡¨ç¤ºã«ã™ã‚‹
         /// </summary>
         public static void Hide()
         {
@@ -37,9 +37,9 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// “¾“_‚ğİ’è
+        /// å¾—ç‚¹ã‚’è¨­å®š
         /// </summary>
-        /// <param name="score">“¾“_</param>
+        /// <param name="score">å¾—ç‚¹</param>
         public static void SetScore(int score)
         {
             instance.textMeshProUGUI.text = score.ToString();

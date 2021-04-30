@@ -1,12 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPGM.UI
 {
     /// <summary>
-    /// ƒtƒF[ƒhUI
-    /// ‚Æ‚è‚ ‚¦‚¸ƒVƒ“ƒOƒ‹ƒgƒ“
+    /// ãƒ•ã‚§ãƒ¼ãƒ‰UI
+    /// ã¨ã‚Šã‚ãˆãšã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³
     /// </summary>
     public class FadeScreen : MonoBehaviour
     {
@@ -29,25 +29,25 @@ namespace RPGM.UI
         {
             if (time > 0.0f)
             {
-                // ƒtƒF[ƒhŠJn
+                // ãƒ•ã‚§ãƒ¼ãƒ‰é–‹å§‹
                 StartCoroutine(instance.FadeCoroutine(startAlpha, endAlpha, time, color));
                 time = -1.0f;
             }
         }
 
         /// <summary>
-        /// ƒtƒF[ƒh§ŒäƒRƒ‹[ƒ`ƒ“
+        /// ãƒ•ã‚§ãƒ¼ãƒ‰åˆ¶å¾¡ã‚³ãƒ«ãƒ¼ãƒãƒ³
         /// </summary>
-        /// <param name="startAlpha">ŠJnƒAƒ‹ƒtƒ@’l</param>
-        /// <param name="endAlpha">I—¹ƒAƒ‹ƒtƒ@’l</param>
-        /// <param name="time">ƒtƒF[ƒhŠÔ</param>
+        /// <param name="startAlpha">é–‹å§‹ã‚¢ãƒ«ãƒ•ã‚¡å€¤</param>
+        /// <param name="endAlpha">çµ‚äº†ã‚¢ãƒ«ãƒ•ã‚¡å€¤</param>
+        /// <param name="time">ãƒ•ã‚§ãƒ¼ãƒ‰æ™‚é–“</param>
         /// <returns>IEnumerator</returns>
         private IEnumerator FadeCoroutine(float startAlpha, float endAlpha, float time, Color color)
         {
             float elapsed_time = 0.0f;
             fade.enabled = true;
 
-            // ƒtƒF[ƒhŠÔ‚ğ‚©‚¯‚ÄüŒ`•âŠÔ
+            // ãƒ•ã‚§ãƒ¼ãƒ‰æ™‚é–“ã‚’ã‹ã‘ã¦ç·šå½¢è£œé–“
             while(elapsed_time < time)
             {
                 color.a = Mathf.Lerp(startAlpha, endAlpha, elapsed_time / time);
@@ -56,7 +56,7 @@ namespace RPGM.UI
                 elapsed_time += Time.deltaTime;
             }
 
-            // ƒtƒF[ƒhI—¹
+            // ãƒ•ã‚§ãƒ¼ãƒ‰çµ‚äº†
             if(endAlpha > 0.0f)
             {
                 color.a = endAlpha;
@@ -70,10 +70,10 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ƒtƒF[ƒhƒCƒ“ŠJn
+        /// ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³é–‹å§‹
         /// </summary>
-        /// <param name="time">ƒtƒF[ƒhŠÔ</param>
-        /// <param name="color">ƒtƒF[ƒhF</param>
+        /// <param name="time">ãƒ•ã‚§ãƒ¼ãƒ‰æ™‚é–“</param>
+        /// <param name="color">ãƒ•ã‚§ãƒ¼ãƒ‰è‰²</param>
         public static void FadeIn(float time, Color color)
         {
             instance.startAlpha = 1.0f;
@@ -83,10 +83,10 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ƒtƒF[ƒhƒAƒEƒgŠJn
+        /// ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆé–‹å§‹
         /// </summary>
-        /// <param name="time">ƒtƒF[ƒhŠÔ</param>
-        /// <param name="color">ƒtƒF[ƒhF</param>
+        /// <param name="time">ãƒ•ã‚§ãƒ¼ãƒ‰æ™‚é–“</param>
+        /// <param name="color">ãƒ•ã‚§ãƒ¼ãƒ‰è‰²</param>
         public static void FadeOut(float time, Color color)
         {
             instance.startAlpha = 0.0f;

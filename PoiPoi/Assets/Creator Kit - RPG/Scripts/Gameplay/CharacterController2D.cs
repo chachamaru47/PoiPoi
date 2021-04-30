@@ -171,7 +171,7 @@ namespace RPGM.Gameplay
                     if (bCharge)
                     {
                         bCharge = false;
-                        useItem.ThrowItem(nextMoveCommand.normalized * chargeTime * 30.0f, socket.transform.localPosition.y);
+                        useItem.ThrowItem(nextMoveCommand.normalized * chargeTime * 20.0f, socket.transform.localPosition.y);
                         useItem = null;
                     }
                 }

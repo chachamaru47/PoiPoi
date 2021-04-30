@@ -1,31 +1,31 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPGM.Gameplay
 {
     /// <summary>
-    /// ƒQ[ƒ€ƒ}ƒl[ƒWƒƒ[
+    /// ã‚²ãƒ¼ãƒ ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼
     /// </summary>
     public class GameManager : MonoBehaviour
     {
         /// <summary>
-        /// ƒQ[ƒ€ƒtƒF[ƒY
+        /// ã‚²ãƒ¼ãƒ ãƒ•ã‚§ãƒ¼ã‚º
         /// </summary>
         public enum GamePhaseType
         {
             /// <summary>
-            ///  ƒI[ƒvƒjƒ“ƒO
+            ///  ã‚ªãƒ¼ãƒ—ãƒ‹ãƒ³ã‚°
             /// </summary>
             Opening,
 
             /// <summary>
-            /// ƒQ[ƒ€’†
+            /// ã‚²ãƒ¼ãƒ ä¸­
             /// </summary>
             InGame,
 
             /// <summary>
-            /// ƒGƒ“ƒfƒBƒ“ƒO
+            /// ã‚¨ãƒ³ãƒ‡ã‚£ãƒ³ã‚°
             /// </summary>
             Ending,
         }
@@ -52,7 +52,7 @@ namespace RPGM.Gameplay
             UI.Score.SetScore(score);
             UI.Timer.SetTime(timer);
 
-            // ƒI[ƒvƒjƒ“ƒOƒV[ƒ“ŠJn
+            // ã‚ªãƒ¼ãƒ—ãƒ‹ãƒ³ã‚°ã‚·ãƒ¼ãƒ³é–‹å§‹
             StartCoroutine(OpeningCoroutine());
         }
 
@@ -63,18 +63,18 @@ namespace RPGM.Gameplay
             {
                 if (Practice)
                 {
-                    // —ûKƒ‚[ƒh’†‚ÍŠÔ‚ğ~‚ß‚é
+                    // ç·´ç¿’ãƒ¢ãƒ¼ãƒ‰ä¸­ã¯æ™‚é–“ã‚’æ­¢ã‚ã‚‹
                     UI.Timer.SetTime(-1.0f);
                 }
                 else
                 {
-                    // ŠÔŒo‰ßˆ—
+                    // æ™‚é–“çµŒéå‡¦ç†
                     timer -= Time.deltaTime;
                     if (timer <= 0.0f)
                     {
-                        // ƒQ[ƒ€I—¹
+                        // ã‚²ãƒ¼ãƒ çµ‚äº†
                         timer = 0.0f;
-                        // ƒGƒ“ƒfƒBƒ“ƒOƒV[ƒ“ŠJn
+                        // ã‚¨ãƒ³ãƒ‡ã‚£ãƒ³ã‚°ã‚·ãƒ¼ãƒ³é–‹å§‹
                         StartCoroutine(EndingCoroutine());
                     }
                     UI.Timer.SetTime(timer);
@@ -83,9 +83,9 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
-        /// “¾“_‰ÁZ
+        /// å¾—ç‚¹åŠ ç®—
         /// </summary>
-        /// <param name="point">“_”</param>
+        /// <param name="point">ç‚¹æ•°</param>
         public void AddScore(int point)
         {
             if (Practice) { return; }
@@ -95,18 +95,18 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
-        /// ‹L˜^XV”»’è
+        /// è¨˜éŒ²æ›´æ–°åˆ¤å®š
         /// </summary>
-        /// <param name="distance">”ò‹——£</param>
-        /// <returns>‹L˜^XV‚µ‚½‚©</returns>
+        /// <param name="distance">é£›è·é›¢</param>
+        /// <returns>è¨˜éŒ²æ›´æ–°ã—ãŸã‹</returns>
         public bool UpdateRecord(float distance)
         {
-            // —ûKƒ‚[ƒh’†‚Í‹L˜^XV‚µ‚È‚¢
+            // ç·´ç¿’ãƒ¢ãƒ¼ãƒ‰ä¸­ã¯è¨˜éŒ²æ›´æ–°ã—ãªã„
             if (Practice) { return false; }
 
             if (record < distance)
             {
-                // ‹L˜^XV‚µ‚½
+                // è¨˜éŒ²æ›´æ–°ã—ãŸ
                 record = distance;
                 return true;
             }
@@ -114,7 +114,7 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
-        /// ƒI[ƒvƒjƒ“ƒOƒV[ƒ“ƒRƒ‹[ƒ`ƒ“
+        /// ã‚ªãƒ¼ãƒ—ãƒ‹ãƒ³ã‚°ã‚·ãƒ¼ãƒ³ã‚³ãƒ«ãƒ¼ãƒãƒ³
         /// </summary>
         /// <returns>IEnumerator</returns>
         private IEnumerator OpeningCoroutine()
@@ -147,7 +147,7 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
-        /// ƒGƒ“ƒfƒBƒ“ƒOƒV[ƒ“ƒRƒ‹[ƒ`ƒ“
+        /// ã‚¨ãƒ³ãƒ‡ã‚£ãƒ³ã‚°ã‚·ãƒ¼ãƒ³ã‚³ãƒ«ãƒ¼ãƒãƒ³
         /// </summary>
         /// <returns></returns>
         private IEnumerator EndingCoroutine()

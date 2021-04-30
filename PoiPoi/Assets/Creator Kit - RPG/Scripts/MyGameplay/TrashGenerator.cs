@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,7 +6,7 @@ using UnityEngine;
 namespace RPGM.Gameplay
 {
     /// <summary>
-    /// ‚²‚İ¶¬Ší
+    /// ã”ã¿ç”Ÿæˆå™¨
     /// </summary>
     public class TrashGenerator : MonoBehaviour
     {
@@ -27,31 +27,31 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
-        /// ‚²‚İƒAƒCƒeƒ€‚Ì¶¬
+        /// ã”ã¿ã‚¢ã‚¤ãƒ†ãƒ ã®ç”Ÿæˆ
         /// </summary>
-        /// <param name="num">¶¬”</param>
-        /// <param name="rect">¶¬”ÍˆÍ</param>
-        /// <param name="seed">—”ƒV[ƒh</param>
+        /// <param name="num">ç”Ÿæˆæ•°</param>
+        /// <param name="rect">ç”Ÿæˆç¯„å›²</param>
+        /// <param name="seed">ä¹±æ•°ã‚·ãƒ¼ãƒ‰</param>
         private void Generation(int num, Rect rect, int seed)
         {
-            // ’Š‘I‚Ìd‚İ‡Œv‚ğZo
+            // æŠ½é¸ã®é‡ã¿åˆè¨ˆã‚’ç®—å‡º
             int total_weight = trashDatas.Sum(v => v.lotWeight);
             if (total_weight <= 0) { return; }
 
-            // —”‰Šú‰»
+            // ä¹±æ•°åˆæœŸåŒ–
             Random.InitState(seed);
-            // ”ñƒAƒNƒeƒBƒu‚Å¶¬‚µ‚Äƒpƒ‰ƒ[ƒ^‚ğİ’è‚µ‚Ä‚©‚çƒAƒNƒeƒBƒu‚É‚·‚é
+            // éã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã§ç”Ÿæˆã—ã¦ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’è¨­å®šã—ã¦ã‹ã‚‰ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã«ã™ã‚‹
             itemBase.gameObject.SetActive(false);
 
             for (int i = 0; i < num; i++)
             {
-                // ¶¬À•W‚ğŒˆ‚ß‚é
+                // ç”Ÿæˆåº§æ¨™ã‚’æ±ºã‚ã‚‹
                 var pos = new Vector3(Random.Range(rect.x, rect.xMax), Random.Range(rect.y, rect.yMax), 0.0f);
-                // ¶¬
+                // ç”Ÿæˆ
                 var item = Instantiate(itemBase, pos, Quaternion.identity);
                 item.gameObject.transform.SetParent(trashCollection.transform);
 
-                // İ’è‚·‚éƒAƒCƒeƒ€ƒf[ƒ^‚ğ’Š‘I
+                // è¨­å®šã™ã‚‹ã‚¢ã‚¤ãƒ†ãƒ ãƒ‡ãƒ¼ã‚¿ã‚’æŠ½é¸
                 int lot = Random.Range(0, total_weight);
                 foreach (var data in trashDatas)
                 {
@@ -63,7 +63,7 @@ namespace RPGM.Gameplay
                     lot -= data.lotWeight;
                 }
 
-                // ÅŒã‚ÉƒAƒNƒeƒBƒu‰»
+                // æœ€å¾Œã«ã‚¢ã‚¯ãƒ†ã‚£ãƒ–åŒ–
                 item.gameObject.SetActive(true);
             }
         }

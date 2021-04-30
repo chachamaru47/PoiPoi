@@ -15,3 +15,7 @@ MonoBehaviour:
   sprite: {fileID: 0}
   animatorController: {fileID: 9100000, guid: 391b9ce51bc38e347a5dd229c5ef6c25, type: 2}
   score: 20
+  mass: 2
+  flyingTime: 3
+  flyingHeight: 4
+  rotateSpeed: 0
