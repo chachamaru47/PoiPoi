@@ -163,7 +163,6 @@ namespace RPGM.Gameplay
                         model.cameraController.ResetFocus();
                     }
                 }
-                Debug.Log(GetFlyingDistance());
 
                 yield return null;
             }

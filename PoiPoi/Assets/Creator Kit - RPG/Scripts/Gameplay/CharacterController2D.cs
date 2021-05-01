@@ -65,7 +65,13 @@ namespace RPGM.Gameplay
             velocity = Mathf.Clamp01(velocity + Time.deltaTime * acceleration);
             UpdateAnimator(nextMoveCommand);
             var move_command = (moveBrake) ? Vector3.zero : nextMoveCommand;
-            rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity, move_command * speed, ref currentVelocity, acceleration, speed);
+            float apply_speed = speed;
+            if (useItem != null)
+            {
+                // アイテムの重さを見て減速
+                apply_speed *= Mathf.Clamp(Mathf.Lerp(1.0f, 0.0f, useItem.data.mass / 5.0f), 0.1f, 1.0f);
+            }
+            rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity, move_command * apply_speed, ref currentVelocity, acceleration, speed);
             spriteRenderer.flipX = (moveBrake ? nextMoveCommand.x : rigidbody2D.velocity.x) >= 0 ? true : false;
         }
 
