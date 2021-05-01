@@ -9,13 +9,10 @@ namespace RPGM.UI
     /// </summary>
     public class PowerGauge : MonoBehaviour
     {
-        public RectTransform gauge;
-
-        private float maxWidth;
+        public UnityEngine.UI.Slider slider;
 
         void Awake()
         {
-            maxWidth = gauge.rect.width;
             Hide();
         }
 
@@ -30,10 +27,10 @@ namespace RPGM.UI
         /// <summary>
         /// ゲージ量を設定したうえで表示する
         /// </summary>
-        /// <param name="power_ratio"></param>
+        /// <param name="power_ratio">ゲージの割合</param>
         public void Show(float power_ratio)
         {
-            gauge.sizeDelta = new Vector2(maxWidth * power_ratio, gauge.sizeDelta.y);
+            slider.value = power_ratio;
             Show();
         }
 
