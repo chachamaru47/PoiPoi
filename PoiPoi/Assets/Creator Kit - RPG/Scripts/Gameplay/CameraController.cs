@@ -25,13 +25,17 @@ namespace RPGM.Gameplay
         float defaultAssetsPPU;
         float assetsPPU;
 #else
+        /// <summary>
+        /// デフォルトの表示範囲
+        /// </summary>
         float defaultOrthographicSize;
 #endif
 
         void Awake()
         {
-            focus = defaultFocus;
-            offset = focus.position - transform.position;
+            ResetFocus();
+            offset = new Vector3(0.0f, -0.1f, 10.0f);
+            transform.position = focus.position - offset + positionOffset;
             pixelPerfectCamera = GetComponent<UnityEngine.U2D.PixelPerfectCamera>();
 #if PIXEL_PERFECT
             pixelPerfectCamera.enabled = true;
@@ -49,32 +53,63 @@ namespace RPGM.Gameplay
             assetsPPU = Mathf.Lerp(assetsPPU, defaultAssetsPPU - GetTargetDistance() * 1.5f, Time.deltaTime * smoothTime);
             pixelPerfectCamera.assetsPPU = (int)assetsPPU;
 #else
+            // デフォルトのフォーカス対象と現在のフォーカス対象の距離が離れるほど表示範囲を大きくする
             Camera.main.orthographicSize = Mathf.Lerp(Camera.main.orthographicSize, defaultOrthographicSize + GetTargetDistance() * 0.3f, Time.deltaTime * smoothTime);
 #endif
 
             transform.position = Vector3.Lerp(transform.position, focus.position - offset + positionOffset, Time.deltaTime * smoothTime);
         }
 
+        /// <summary>
+        /// デフォルトのフォーカス対象を設定する
+        /// </summary>
+        /// <param name="target">デフォルトのフォーカス対象</param>
+        public void SetDefaultFocus(Transform target)
+        {
+            defaultFocus = target;
+            ResetFocus();
+        }
+
+        /// <summary>
+        /// 指定のターゲットにフォーカスを移す
+        /// </summary>
+        /// <param name="target">ターゲット</param>
         public void SetFocus(Transform target)
         {
             focus = target;
         }
 
+        /// <summary>
+        /// フォーカス対象をデフォルトに戻す
+        /// </summary>
         public void ResetFocus()
         {
             SetFocus(defaultFocus);
         }
 
+        /// <summary>
+        /// 現在のフォーカスが指定のターゲットにあっているか
+        /// </summary>
+        /// <param name="target">ターゲット</param>
+        /// <returns>指定ターゲットをフォーカスしていれば真</returns>
         public bool IsTargetFocus(Transform target)
         {
             return focus == target;
         }
 
+        /// <summary>
+        /// フォーカス対象がデフォルト状態か
+        /// </summary>
+        /// <returns>フォーカス対象がデフォルト状態なら真</returns>
         public bool IsDefaultFocus()
         {
             return IsTargetFocus(defaultFocus);
         }
 
+        /// <summary>
+        /// デフォルトのフォーカス対象から現在のフォーカスまでの距離
+        /// </summary>
+        /// <returns>距離</returns>
         private float GetTargetDistance()
         {
             return Mathf.Abs(Vector3.Distance(focus.position, defaultFocus.position));
