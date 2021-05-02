@@ -29,6 +29,7 @@ namespace RPGM.Mechanics
                     batch.spriteRenderers = batch.sceneParent.GetComponentsInChildren<SpriteRenderer>();
                 }
             }
+            nextFrameTime = Time.time;
         }
 
         void Update()
