@@ -54,7 +54,7 @@ namespace RPGM.Gameplay
                 end = start + nextMoveCommand;
                 distance = (end - start).magnitude;
                 velocity = 0;
-                UpdateAnimator(nextMoveCommand);
+                UpdateAnimator(nextMoveCommand, true);
                 nextMoveCommand = Vector3.zero;
                 state = State.Moving;
             }
@@ -63,7 +63,7 @@ namespace RPGM.Gameplay
         void MoveState()
         {
             velocity = Mathf.Clamp01(velocity + Time.deltaTime * acceleration);
-            UpdateAnimator(nextMoveCommand);
+            UpdateAnimator(nextMoveCommand, moveBrake);
             var move_command = (moveBrake) ? Vector3.zero : nextMoveCommand;
             float apply_speed = speed;
             if (useItem != null)
@@ -75,7 +75,7 @@ namespace RPGM.Gameplay
             spriteRenderer.flipX = (moveBrake ? nextMoveCommand.x : rigidbody2D.velocity.x) >= 0 ? true : false;
         }
 
-        void UpdateAnimator(Vector3 direction)
+        void UpdateAnimator(Vector3 direction, bool stay)
         {
             if (animator)
             {
@@ -84,6 +84,7 @@ namespace RPGM.Gameplay
                 int wy = (!yanim) ? 0 : (direction.y < 0) ? 1 : (direction.y > 0) ? -1 : 0;
                 animator.SetInteger("WalkX", wx);
                 animator.SetInteger("WalkY", wy);
+                animator.SetBool("Stay", stay);
             }
         }
 

@@ -22,12 +22,18 @@ namespace RPGM.Gameplay
             var t = stateInfo.normalizedTime % 1;
             if (lastNormalizedTime < leftFoot && t >= leftFoot)
             {
-                UserInterfaceAudio.PlayClip(clips[clipIndex]);
+                if (!animator.GetBool("Stay"))
+                {
+                    UserInterfaceAudio.PlayClip(clips[clipIndex]);
+                }
                 clipIndex = (clipIndex + 1) % clips.Length;
             }
             if (lastNormalizedTime < rightFoot && t >= rightFoot)
             {
-                UserInterfaceAudio.PlayClip(clips[clipIndex]);
+                if (!animator.GetBool("Stay"))
+                {
+                    UserInterfaceAudio.PlayClip(clips[clipIndex]);
+                }
                 clipIndex = (clipIndex + 1) % clips.Length;
             }
             lastNormalizedTime = t;
