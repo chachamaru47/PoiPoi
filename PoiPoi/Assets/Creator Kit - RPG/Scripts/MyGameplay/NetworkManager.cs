@@ -28,11 +28,13 @@ namespace RPGM.Gameplay
         // ゲームサーバーへの接続が成功した時に呼ばれるコールバック
         public override void OnJoinedRoom()
         {
+#if false   // ゲーム開始時に生成するように変更
             // ランダムな座標に自身のアバター（ネットワークオブジェクト）を生成する
             Random.InitState((int)(Time.time * 100));
             var position = new Vector3(Random.Range(2f, 4f), Random.Range(9f, 11f));
             var player_obj = PhotonNetwork.Instantiate("Character", position, Quaternion.identity);
             model.player = player_obj.GetComponent<CharacterController2D>();
+#endif
         }
     }
 }

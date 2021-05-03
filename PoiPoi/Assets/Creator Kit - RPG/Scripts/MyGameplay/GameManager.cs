@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 namespace RPGM.Gameplay
@@ -7,7 +8,7 @@ namespace RPGM.Gameplay
     /// <summary>
     /// ゲームマネージャー
     /// </summary>
-    public class GameManager : MonoBehaviour
+    public class GameManager : MonoBehaviourPunCallbacks
     {
         GameModel model = Core.Schedule.GetModel<GameModel>();
 
@@ -36,15 +37,45 @@ namespace RPGM.Gameplay
         float timer;
 
         public GamePhaseType GamePhase { get; set; }
-        public bool Practice { get; set; }
+        public bool Practice { get => practice; set => practice = value; }
 
         int score;
         float record;
+
+        bool start
+        {
+            get => (PhotonNetwork.CurrentRoom.CustomProperties["Start"] is bool value) ? value : false;
+            set
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    var hashtable = new ExitGames.Client.Photon.Hashtable();
+                    hashtable["Start"] = value;
+                    PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable);
+                }
+            }
+        }
+
+        bool practice
+        {
+            get => (PhotonNetwork.CurrentRoom.CustomProperties["Practice"] is bool value) ? value : false;
+            set
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    var hashtable = new ExitGames.Client.Photon.Hashtable();
+                    hashtable["Practice"] = value;
+                    PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable);
+                }
+            }
+        }
 
         private void Awake()
         {
             score = 0;
             record = -1.0f;
+            start = false;
+            Practice = false;
             GamePhase = GamePhaseType.Opening;
         }
 
@@ -115,6 +146,15 @@ namespace RPGM.Gameplay
             return false;
         }
 
+        public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
+        {
+            // 更新されたルームのカスタムプロパティのペアをコンソールに出力する
+            foreach (var prop in propertiesThatChanged)
+            {
+                Debug.Log($"{prop.Key}: {prop.Value}");
+            }
+        }
+
         /// <summary>
         /// オープニングシーンコルーチン
         /// </summary>
@@ -130,11 +170,22 @@ namespace RPGM.Gameplay
                 "Pic or Charge : A\n" +
                 "Dash : R Trigger\n" +
                 "Stay : L Trigger",
-                true);
+                PhotonNetwork.IsMasterClient);
             yield return new WaitForSeconds(0.5f);
 
-            yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
+            // マスターの人がボタン押下したらゲーム開始
+            if (PhotonNetwork.IsMasterClient)
+            {
+                yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
+                start = true;
+            }
+            yield return new WaitUntil(() => start);
 
+            // ランダムな座標に自身のアバター（ネットワークオブジェクト）を生成する
+            Random.InitState((int)(Time.time * 100));
+            var position = new Vector3(Random.Range(2f, 4f), Random.Range(9f, 11f));
+            var player_obj = PhotonNetwork.Instantiate("Character", position, Quaternion.identity);
+            model.player = player_obj.GetComponent<CharacterController2D>();
             UI.MessageBoard.Show("Let's ....");
             yield return new WaitForSeconds(1.5f);
 
