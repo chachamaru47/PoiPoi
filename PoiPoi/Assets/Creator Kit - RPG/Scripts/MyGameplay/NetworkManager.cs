@@ -7,8 +7,13 @@ namespace RPGM.Gameplay
     // MonoBehaviourPunCallbacksを継承して、PUNのコールバックを受け取れるようにする
     public class NetworkManager : MonoBehaviourPunCallbacks
     {
+        GameModel model = Core.Schedule.GetModel<GameModel>();
+
         private void Start()
         {
+            // プレイヤー自身の名前をPCのユーザー名に設定する
+            PhotonNetwork.NickName = System.Environment.UserName;
+
             // PhotonServerSettingsの設定内容を使ってマスターサーバーへ接続する
             PhotonNetwork.ConnectUsingSettings();
         }
@@ -24,10 +29,10 @@ namespace RPGM.Gameplay
         public override void OnJoinedRoom()
         {
             // ランダムな座標に自身のアバター（ネットワークオブジェクト）を生成する
-            //var position = new Vector3(3.0f, 10.0f);
             Random.InitState((int)(Time.time * 100));
             var position = new Vector3(Random.Range(2f, 4f), Random.Range(9f, 11f));
-            PhotonNetwork.Instantiate("Avatar", position, Quaternion.identity);
+            var player_obj = PhotonNetwork.Instantiate("Character", position, Quaternion.identity);
+            model.player = player_obj.GetComponent<CharacterController2D>();
         }
     }
 }

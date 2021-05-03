@@ -141,7 +141,6 @@ namespace RPGM.Gameplay
             UI.MessageBoard.Show("Poi Poi !!!!");
             yield return new WaitForSeconds(1.5f);
 
-            model.player = Instantiate(model.player, new Vector3(3, 10, 0), Quaternion.identity);
             model.cameraController.SetDefaultFocus(model.player.transform);
             UI.MessageBoard.Hide();
             UI.Score.Show();
