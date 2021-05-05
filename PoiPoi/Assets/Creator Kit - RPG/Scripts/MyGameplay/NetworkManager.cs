@@ -7,7 +7,7 @@ namespace RPGM.Gameplay
     // MonoBehaviourPunCallbacksを継承して、PUNのコールバックを受け取れるようにする
     public class NetworkManager : MonoBehaviourPunCallbacks
     {
-        public static bool IsOnlineMode { get; set; } = true;
+        public static bool IsOnlineMode { get; set; } = false;
 
         private void Start()
         {

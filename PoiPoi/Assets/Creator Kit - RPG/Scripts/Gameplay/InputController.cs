@@ -1,4 +1,4 @@
-using RPGM.Core;
+ï»¿using RPGM.Core;
 using RPGM.Gameplay;
 using UnityEngine;
 
@@ -27,26 +27,23 @@ namespace RPGM.UI
 
         void Update()
         {
-            // ƒAƒvƒŠI—¹
-            if (Input.GetKey(KeyCode.Escape) || Input.GetKey("joystick button 4") && Input.GetKey("joystick button 5") && Input.GetKey("joystick button 6") && Input.GetKey("joystick button 7"))
-            {
-                Quit();
-            }
+            // ã‚¢ãƒ—ãƒªçµ‚äº†ã®å…¥åŠ›ç›£è¦–
+            MonitoringQuitInput();
 
-            // —ûKƒ‚[ƒhØ‚è‘Ö‚¦
+            // ç·´ç¿’ãƒ¢ãƒ¼ãƒ‰åˆ‡ã‚Šæ›¿ãˆ
             if (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown("joystick button 3"))
             {
                 model.gameManager.Practice = !model.gameManager.Practice;
             }
 
-            // ƒQ[ƒ€’†ˆÈŠO‚ÍˆÈ~‚Ì‘€ì‚Íó‚¯•t‚¯‚¸‚É‹A‚é
+            // ã‚²ãƒ¼ãƒ ä¸­ä»¥å¤–ã¯ä»¥é™ã®æ“ä½œã¯å—ã‘ä»˜ã‘ãšã«å¸°ã‚‹
             if (model.gameManager.GamePhase != GameManager.GamePhaseType.InGame)
             {
                 model.player.nextMoveCommand = Vector3.zero;
                 return;
             }
 
-            // ó‘Ô‚²‚Æ‚Ì‘€ì
+            // çŠ¶æ…‹ã”ã¨ã®æ“ä½œ
             switch (state)
             {
                 case State.CharacterControl:
@@ -59,7 +56,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ƒ_ƒCƒAƒƒO‘€ì
+        /// ãƒ€ã‚¤ã‚¢ãƒ­ã‚°æ“ä½œ
         /// </summary>
         void DialogControl()
         {
@@ -81,7 +78,7 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ƒLƒƒƒ‰ƒNƒ^[‘€ì
+        /// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼æ“ä½œ
         /// </summary>
         void CharacterControl()
         {
@@ -110,15 +107,27 @@ namespace RPGM.UI
         }
 
         /// <summary>
-        /// ƒAƒvƒŠI—¹
+        /// ã‚¢ãƒ—ãƒªçµ‚äº†
         /// </summary>
-        void Quit()
+        static void Quit()
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #elif UNITY_STANDALONE
             UnityEngine.Application.Quit();
 #endif
+        }
+
+        /// <summary>
+        /// ã‚¢ãƒ—ãƒªçµ‚äº†ã®å…¥åŠ›ç›£è¦–
+        /// </summary>
+        public static void MonitoringQuitInput()
+        {
+            if (Input.GetKey(KeyCode.Escape) || Input.GetKey("joystick button 4") && Input.GetKey("joystick button 5") && Input.GetKey("joystick button 6") && Input.GetKey("joystick button 7"))
+            {
+                // ã‚¢ãƒ—ãƒªçµ‚äº†
+                Quit();
+            }
         }
     }
 }

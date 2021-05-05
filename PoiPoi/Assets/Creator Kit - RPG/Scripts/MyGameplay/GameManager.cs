@@ -176,7 +176,7 @@ namespace RPGM.Gameplay
         private IEnumerator OpeningCoroutine()
         {
             GamePhase = GamePhaseType.Opening;
-            UI.FadeScreen.FadeIn(1.0f, Color.black);
+            UI.FadeScreen.FadeIn(1.0f, Color.white);
             yield return new WaitForSeconds(1.5f);
 
             // Photonがルームに入室するまで待つ
@@ -240,10 +240,8 @@ namespace RPGM.Gameplay
             UI.Result.Hide();
             yield return new WaitForSeconds(1.0f);
 
-            UI.FadeScreen.FadeOut(1.0f, Color.white);
-            yield return new WaitForSeconds(1.0f);
-
-            yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
+            UI.FadeScreen.FadeOut(1.0f, Color.black);
+            yield return new WaitForSeconds(1.5f);
 
             if (PhotonNetwork.OfflineMode)
             {
@@ -259,7 +257,7 @@ namespace RPGM.Gameplay
             }
 
             // ゲームシーンのリロード
-            UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("TopScene");
             yield break;
         }
     }
