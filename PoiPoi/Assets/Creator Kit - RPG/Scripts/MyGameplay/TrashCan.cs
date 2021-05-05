@@ -31,13 +31,17 @@ namespace RPGM.Gameplay
                     // 基礎点*飛距離が点数
                     float distance = item.GetFlyingDistance();
                     int score = (int)(item.data.score * distance);
-                    // 加点
-                    model.gameManager.AddScore(score);
-                    // 記録更新判定
-                    if (model.gameManager.UpdateRecord(distance))
+                    // 自分の投げたアイテムのみ加点処理
+                    if (item.ownerId == model.gameManager.PlayerId)
                     {
-                        // 記録更新があった
-                        MessageBar.Show($"New Record !!!!  Distance:{distance.ToString("0.00")}m");
+                        // 加点
+                        model.gameManager.AddScore(score);
+                        // 記録更新判定
+                        if (model.gameManager.UpdateRecord(distance))
+                        {
+                            // 記録更新があった
+                            MessageBar.Show($"New Record !!!!  Distance:{distance.ToString("0.00")}m");
+                        }
                     }
                     // 効果音再生
                     UserInterfaceAudio.OnCollect();
@@ -48,7 +52,7 @@ namespace RPGM.Gameplay
                 }
 
                 // アイテムは削除
-                Destroy(collider.gameObject);
+                model.trashGenerator.DestroyItem(item.id);
             }
         }
     }

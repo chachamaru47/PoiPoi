@@ -655,6 +655,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
+  - {fileID: 8171158353334016009}
   - {fileID: 5889355130299969547}
   - {fileID: 3218850228177884743}
   sceneViewId: 0
@@ -701,7 +702,7 @@ MonoBehaviour:
     SynchronizeType: 0
     Name: Talk
   - Type: 4
-    SynchronizeType: 0
+    SynchronizeType: 1
     Name: Stay
   m_SynchronizeLayers:
   - SynchronizeType: 0

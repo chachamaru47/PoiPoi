@@ -60,6 +60,7 @@ MonoBehaviour:
     inventoryController: {fileID: 0}
     musicController: {fileID: 3534774729685244126}
     cameraController: {fileID: 0}
+    trashGenerator: {fileID: 0}
 --- !u!114 &435158885942284248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117,7 +118,7 @@ MonoBehaviour:
   onButtonExit: {fileID: 0}
   onShowDialog: {fileID: 0}
   onHideDialog: {fileID: 0}
-  onPic: {fileID: 0}
+  onPick: {fileID: 8300000, guid: 4352d1e8bbb9cb442bb61f248d9f4cf0, type: 3}
   onCollect: {fileID: 8300000, guid: d617102f0067466459a5a73c418501e7, type: 3}
   onStoryItem: {fileID: 8300000, guid: 46e6c79da3ec0f14f95bb09260978820, type: 3}
   vocals:

@@ -35,7 +35,10 @@ namespace RPGM.Gameplay
         {
             ResetFocus();
             offset = new Vector3(0.0f, -0.1f, 10.0f);
-            transform.position = focus.position - offset + positionOffset;
+            if (focus != null)
+            {
+                transform.position = focus.position - offset + positionOffset;
+            }
             pixelPerfectCamera = GetComponent<UnityEngine.U2D.PixelPerfectCamera>();
 #if PIXEL_PERFECT
             pixelPerfectCamera.enabled = true;
@@ -57,7 +60,10 @@ namespace RPGM.Gameplay
             Camera.main.orthographicSize = Mathf.Lerp(Camera.main.orthographicSize, defaultOrthographicSize + GetTargetDistance() * 0.3f, Time.deltaTime * smoothTime);
 #endif
 
-            transform.position = Vector3.Lerp(transform.position, focus.position - offset + positionOffset, Time.deltaTime * smoothTime);
+            if (focus != null)
+            {
+                transform.position = Vector3.Lerp(transform.position, focus.position - offset + positionOffset, Time.deltaTime * smoothTime);
+            }
         }
 
         /// <summary>
@@ -112,7 +118,7 @@ namespace RPGM.Gameplay
         /// <returns>距離</returns>
         private float GetTargetDistance()
         {
-            return Mathf.Abs(Vector3.Distance(focus.position, defaultFocus.position));
+            return (focus != null) ? Mathf.Abs(Vector3.Distance(focus.position, defaultFocus.position)) : 0;
         }
 
     }

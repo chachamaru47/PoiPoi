@@ -37,45 +37,49 @@ namespace RPGM.Gameplay
         float timer;
 
         public GamePhaseType GamePhase { get; set; }
-        public bool Practice { get => practice; set => practice = value; }
+        public bool Practice { get => roomProperty_practice; set => roomProperty_practice = value; }
+        public int PlayerId { get => playerId; }
 
         int score;
         float record;
 
-        bool start
+        bool roomProperty_start
         {
-            get => (PhotonNetwork.CurrentRoom.CustomProperties["Start"] is bool value) ? value : false;
+            get => (PhotonNetwork.CurrentRoom?.CustomProperties["Start"] is bool value) ? value : false;
             set
             {
                 if (PhotonNetwork.IsMasterClient)
                 {
                     var hashtable = new ExitGames.Client.Photon.Hashtable();
                     hashtable["Start"] = value;
-                    PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable);
+                    PhotonNetwork.CurrentRoom?.SetCustomProperties(hashtable);
                 }
             }
         }
 
-        bool practice
+        bool roomProperty_practice
         {
-            get => (PhotonNetwork.CurrentRoom.CustomProperties["Practice"] is bool value) ? value : false;
+            get => (PhotonNetwork.CurrentRoom?.CustomProperties["Practice"] is bool value) ? value : false;
             set
             {
                 if (PhotonNetwork.IsMasterClient)
                 {
                     var hashtable = new ExitGames.Client.Photon.Hashtable();
                     hashtable["Practice"] = value;
-                    PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable);
+                    PhotonNetwork.CurrentRoom?.SetCustomProperties(hashtable);
                 }
             }
+        }
+
+        int playerId
+        {
+            get => PhotonNetwork.LocalPlayer?.ActorNumber ?? -1;
         }
 
         private void Awake()
         {
             score = 0;
             record = -1.0f;
-            start = false;
-            Practice = false;
             GamePhase = GamePhaseType.Opening;
         }
 
@@ -146,13 +150,23 @@ namespace RPGM.Gameplay
             return false;
         }
 
+        /// <summary>
+        /// ルームのカスタムプロパティが変更されたときに呼び出されます。propertiesThatChangedには、Room.SetCustomPropertiesで設定されたものがすべて含まれています。
+        /// </summary>
+        /// <remarks>
+        /// v1.25以降、このメソッドは1つのパラメータ、Hashtable propertiesThatChangedを持ちます。
+        /// プロパティの変更はRoom.SetCustomPropertiesによって行われる必要があります。これにより、このコールバックもローカルで発生します。
+        /// </remarks>
+        /// <param name="propertiesThatChanged">設定されたカスタムプロパティ</param>
         public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
         {
+#if false
             // 更新されたルームのカスタムプロパティのペアをコンソールに出力する
             foreach (var prop in propertiesThatChanged)
             {
                 Debug.Log($"{prop.Key}: {prop.Value}");
             }
+#endif
         }
 
         /// <summary>
@@ -165,9 +179,12 @@ namespace RPGM.Gameplay
             UI.FadeScreen.FadeIn(1.0f, Color.black);
             yield return new WaitForSeconds(1.5f);
 
+            // Photonがルームに入室するまで待つ
+            yield return new WaitUntil(() => PhotonNetwork.InRoom);
+
             UI.MessageBoard.Show(
                 "Move : R Stick\n" +
-                "Pic or Charge : A\n" +
+                "Pick or Charge : A\n" +
                 "Dash : R Trigger\n" +
                 "Stay : L Trigger",
                 PhotonNetwork.IsMasterClient);
@@ -177,9 +194,10 @@ namespace RPGM.Gameplay
             if (PhotonNetwork.IsMasterClient)
             {
                 yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
-                start = true;
+                PhotonNetwork.CurrentRoom.IsOpen = false;
+                roomProperty_start = true;
             }
-            yield return new WaitUntil(() => start);
+            yield return new WaitUntil(() => roomProperty_start);
 
             // ランダムな座標に自身のアバター（ネットワークオブジェクト）を生成する
             Random.InitState((int)(Time.time * 100));
@@ -212,6 +230,7 @@ namespace RPGM.Gameplay
             UI.MessageBoard.Show("Finish !!!!");
             yield return new WaitForSeconds(3.0f);
 
+            // リザルト表示
             UI.MessageBoard.Hide();
             UI.Result.Show(score, record);
             yield return new WaitForSeconds(0.5f);
@@ -226,6 +245,20 @@ namespace RPGM.Gameplay
 
             yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
 
+            if (PhotonNetwork.OfflineMode)
+            {
+                // オフラインモードから切断
+                PhotonNetwork.OfflineMode = false;
+                yield return new WaitUntil(() => !PhotonNetwork.IsConnected);
+            }
+            else
+            {
+                // サーバーから切断
+                PhotonNetwork.Disconnect();
+                yield return new WaitUntil(() => !PhotonNetwork.IsConnected);
+            }
+
+            // ゲームシーンのリロード
             UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
             yield break;
         }

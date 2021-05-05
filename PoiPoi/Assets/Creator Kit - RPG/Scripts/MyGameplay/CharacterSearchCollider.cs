@@ -18,7 +18,7 @@ namespace RPGM.Gameplay
             var item = collider.GetComponent<DropItem>();
             if (item != null)
             {
-                model.player.PicItem(item);
+                model.player.PickItem(item);
             }
         }
     }

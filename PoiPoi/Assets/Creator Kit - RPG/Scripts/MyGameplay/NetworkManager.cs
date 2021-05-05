@@ -7,34 +7,51 @@ namespace RPGM.Gameplay
     // MonoBehaviourPunCallbacksを継承して、PUNのコールバックを受け取れるようにする
     public class NetworkManager : MonoBehaviourPunCallbacks
     {
-        GameModel model = Core.Schedule.GetModel<GameModel>();
+        public static bool IsOnlineMode { get; set; } = true;
 
         private void Start()
         {
             // プレイヤー自身の名前をPCのユーザー名に設定する
             PhotonNetwork.NickName = System.Environment.UserName;
 
-            // PhotonServerSettingsの設定内容を使ってマスターサーバーへ接続する
-            PhotonNetwork.ConnectUsingSettings();
+            if (IsOnlineMode)
+            {
+                // PhotonServerSettingsの設定内容を使ってマスターサーバーへ接続する
+                PhotonNetwork.ConnectUsingSettings();
+            }
+            else
+            {
+                // オフラインモードで接続する
+                // falseからtrueに設定されると、PhotonはコールOnConnectedToMaster() とともにコールバックをおこないます。その後ルームを作成可能になり、このルームはオフラインになります。
+                PhotonNetwork.OfflineMode = true;
+            }
         }
 
         // マスターサーバーへの接続が成功した時に呼ばれるコールバック
         public override void OnConnectedToMaster()
         {
+#if false
             // "Room"という名前のルームに参加する（ルームが存在しなければ作成して参加する）
             PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions(), TypedLobby.Default);
+#endif
+            // ランダムなルームに参加する
+            PhotonNetwork.JoinRandomRoom();
+        }
+
+        // ランダムで参加できるルームが存在しないなら、新規でルームを作成する
+        public override void OnJoinRandomFailed(short returnCode, string message)
+        {
+            // ルームの参加人数を設定する
+            var roomOptions = new RoomOptions();
+            roomOptions.MaxPlayers = 4;
+
+            PhotonNetwork.CreateRoom(null, roomOptions);
         }
 
         // ゲームサーバーへの接続が成功した時に呼ばれるコールバック
         public override void OnJoinedRoom()
         {
-#if false   // ゲーム開始時に生成するように変更
-            // ランダムな座標に自身のアバター（ネットワークオブジェクト）を生成する
-            Random.InitState((int)(Time.time * 100));
-            var position = new Vector3(Random.Range(2f, 4f), Random.Range(9f, 11f));
-            var player_obj = PhotonNetwork.Instantiate("Character", position, Quaternion.identity);
-            model.player = player_obj.GetComponent<CharacterController2D>();
-#endif
+            ;
         }
     }
 }

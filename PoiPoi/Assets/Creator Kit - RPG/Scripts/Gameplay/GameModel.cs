@@ -21,6 +21,7 @@ namespace RPGM.Gameplay
         public InventoryController inventoryController;
         public MusicController musicController;
         public CameraController cameraController;
+        public TrashGenerator trashGenerator;
 
         Dictionary<GameObject, HashSet<string>> conversations = new Dictionary<GameObject, HashSet<string>>();
 

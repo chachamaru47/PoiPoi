@@ -13,6 +13,8 @@ namespace RPGM.Gameplay
     [RequireComponent(typeof(Rigidbody2D), typeof(CircleCollider2D))]
     public class DropItem : MonoBehaviour
     {
+        public int id;
+        public int ownerId = -1;
         public TrashData data;
 
         public SpriteRenderer body;
@@ -23,6 +25,8 @@ namespace RPGM.Gameplay
         private GameObject oldHome;
         private float aboveGround = 0.0f;
         private Vector3? throwStartPos;
+        private CircleCollider2D collider2d;
+        private Rigidbody2D rigidbody2d;
 
         void Reset()
         {
@@ -31,6 +35,9 @@ namespace RPGM.Gameplay
 
         void OnEnable()
         {
+            collider2d = GetComponent<CircleCollider2D>();
+            rigidbody2d = GetComponent<Rigidbody2D>();
+
             // アイテムデータから画像を設定
             if (body != null)
             {
@@ -47,7 +54,7 @@ namespace RPGM.Gameplay
                 }
             }
 
-            GetComponent<Rigidbody2D>().mass = data.mass;
+            rigidbody2d.mass = data.mass;
 
             // 現在の親オブジェクトを故郷に設定
             oldHome = transform.parent?.gameObject;
@@ -56,20 +63,22 @@ namespace RPGM.Gameplay
         /// <summary>
         /// 拾われる
         /// </summary>
-        public void PicItem()
+        public void PickItem(int playerId)
         {
+            ownerId = playerId;
+
             // 拾われている間当たり判定は消しておく
-            GetComponent<CircleCollider2D>().enabled = false;
+            collider2d.enabled = false;
             // 拾われている間影も消しておく
             shadow.gameObject.SetActive(false);
             // キャラクターより手前に
             body.sortingOrder = 1;
             // 物理挙動オフ
-            GetComponent<Rigidbody2D>().simulated = false;
+            rigidbody2d.simulated = false;
             // 投射開始位置をクリア
             throwStartPos = null;
 
-            UserInterfaceAudio.OnPic();
+            UserInterfaceAudio.OnPick();
         }
 
         /// <summary>
@@ -103,6 +112,16 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
+        /// 拾われている状態か
+        /// </summary>
+        /// <returns>拾われている状態なら真</returns>
+        public bool IsPicked()
+        {
+            // 当たり判定が無効になっている間は拾われている状態とみなす
+            return !collider2d.enabled;
+        }
+
+        /// <summary>
         /// 飛ばす処理のコルーチン
         /// </summary>
         /// <param name="force">飛ばす力</param>
@@ -119,9 +138,8 @@ namespace RPGM.Gameplay
             body.flipX = (force.x > 0.0f);
 
             // 物理挙動開始して力を加える
-            var rigidbody = GetComponent<Rigidbody2D>();
-            rigidbody.simulated = true;
-            rigidbody.AddForce(force, ForceMode2D.Impulse);
+            rigidbody2d.simulated = true;
+            rigidbody2d.AddForce(force, ForceMode2D.Impulse);
 
             // 空中にいる間のループ
             float flying_time = 0.0f;
@@ -173,9 +191,9 @@ namespace RPGM.Gameplay
             aboveGround = 0.0f;
             body.transform.localPosition = Vector3.zero;
             body.transform.localRotation = Quaternion.identity;
-            rigidbody.velocity = Vector2.zero;
+            rigidbody2d.velocity = Vector2.zero;
             // 当たり判定をオン
-            GetComponent<CircleCollider2D>().enabled = true;
+            collider2d.enabled = true;
             // カメラがこのアイテムをフォーカスしたままだったらフォーカスをお返しする
             if(model.cameraController.IsTargetFocus(transform))
             {
