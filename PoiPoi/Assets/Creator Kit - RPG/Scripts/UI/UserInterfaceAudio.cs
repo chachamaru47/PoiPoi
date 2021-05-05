@@ -12,7 +12,7 @@ namespace RPGM.UI
 
         public AudioClip onButtonClick, onButtonEnter, onButtonExit;
         public AudioClip onShowDialog, onHideDialog;
-        public AudioClip onPic;
+        public AudioClip onPick;
         public AudioClip onCollect;
         public AudioClip onStoryItem;
 
@@ -65,9 +65,9 @@ namespace RPGM.UI
                 instance.PlaySpeech(seed, syllables, pitch);
         }
 
-        public static void OnPic()
+        public static void OnPick()
         {
-            if (instance != null) instance.Play(instance.onPic);
+            if (instance != null) instance.Play(instance.onPick);
         }
 
         public static void OnCollect()

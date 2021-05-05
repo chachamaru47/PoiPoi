@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 namespace RPGM.Gameplay
@@ -7,7 +8,7 @@ namespace RPGM.Gameplay
     /// <summary>
     /// ゲームマネージャー
     /// </summary>
-    public class GameManager : MonoBehaviour
+    public class GameManager : MonoBehaviourPunCallbacks
     {
         GameModel model = Core.Schedule.GetModel<GameModel>();
 
@@ -36,10 +37,44 @@ namespace RPGM.Gameplay
         float timer;
 
         public GamePhaseType GamePhase { get; set; }
-        public bool Practice { get; set; }
+        public bool Practice { get => roomProperty_practice; set => roomProperty_practice = value; }
+        public int PlayerId { get => playerId; }
 
         int score;
         float record;
+
+        bool roomProperty_start
+        {
+            get => (PhotonNetwork.CurrentRoom?.CustomProperties["Start"] is bool value) ? value : false;
+            set
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    var hashtable = new ExitGames.Client.Photon.Hashtable();
+                    hashtable["Start"] = value;
+                    PhotonNetwork.CurrentRoom?.SetCustomProperties(hashtable);
+                }
+            }
+        }
+
+        bool roomProperty_practice
+        {
+            get => (PhotonNetwork.CurrentRoom?.CustomProperties["Practice"] is bool value) ? value : false;
+            set
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    var hashtable = new ExitGames.Client.Photon.Hashtable();
+                    hashtable["Practice"] = value;
+                    PhotonNetwork.CurrentRoom?.SetCustomProperties(hashtable);
+                }
+            }
+        }
+
+        int playerId
+        {
+            get => PhotonNetwork.LocalPlayer?.ActorNumber ?? -1;
+        }
 
         private void Awake()
         {
@@ -116,32 +151,65 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
+        /// ルームのカスタムプロパティが変更されたときに呼び出されます。propertiesThatChangedには、Room.SetCustomPropertiesで設定されたものがすべて含まれています。
+        /// </summary>
+        /// <remarks>
+        /// v1.25以降、このメソッドは1つのパラメータ、Hashtable propertiesThatChangedを持ちます。
+        /// プロパティの変更はRoom.SetCustomPropertiesによって行われる必要があります。これにより、このコールバックもローカルで発生します。
+        /// </remarks>
+        /// <param name="propertiesThatChanged">設定されたカスタムプロパティ</param>
+        public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
+        {
+#if false
+            // 更新されたルームのカスタムプロパティのペアをコンソールに出力する
+            foreach (var prop in propertiesThatChanged)
+            {
+                Debug.Log($"{prop.Key}: {prop.Value}");
+            }
+#endif
+        }
+
+        /// <summary>
         /// オープニングシーンコルーチン
         /// </summary>
         /// <returns>IEnumerator</returns>
         private IEnumerator OpeningCoroutine()
         {
             GamePhase = GamePhaseType.Opening;
-            UI.FadeScreen.FadeIn(1.0f, Color.black);
+            UI.FadeScreen.FadeIn(1.0f, Color.white);
             yield return new WaitForSeconds(1.5f);
+
+            // Photonがルームに入室するまで待つ
+            yield return new WaitUntil(() => PhotonNetwork.InRoom);
 
             UI.MessageBoard.Show(
                 "Move : R Stick\n" +
-                "Pic or Charge : A\n" +
+                "Pick or Charge : A\n" +
                 "Dash : R Trigger\n" +
                 "Stay : L Trigger",
-                true);
+                PhotonNetwork.IsMasterClient);
             yield return new WaitForSeconds(0.5f);
 
-            yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
+            // マスターの人がボタン押下したらゲーム開始
+            if (PhotonNetwork.IsMasterClient)
+            {
+                yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
+                PhotonNetwork.CurrentRoom.IsOpen = false;
+                roomProperty_start = true;
+            }
+            yield return new WaitUntil(() => roomProperty_start);
 
+            // ランダムな座標に自身のアバター（ネットワークオブジェクト）を生成する
+            Random.InitState((int)(Time.time * 100));
+            var position = new Vector3(Random.Range(2f, 4f), Random.Range(9f, 11f));
+            var player_obj = PhotonNetwork.Instantiate("Character", position, Quaternion.identity);
+            model.player = player_obj.GetComponent<CharacterController2D>();
             UI.MessageBoard.Show("Let's ....");
             yield return new WaitForSeconds(1.5f);
 
             UI.MessageBoard.Show("Poi Poi !!!!");
             yield return new WaitForSeconds(1.5f);
 
-            model.player = Instantiate(model.player, new Vector3(3, 10, 0), Quaternion.identity);
             model.cameraController.SetDefaultFocus(model.player.transform);
             UI.MessageBoard.Hide();
             UI.Score.Show();
@@ -162,6 +230,7 @@ namespace RPGM.Gameplay
             UI.MessageBoard.Show("Finish !!!!");
             yield return new WaitForSeconds(3.0f);
 
+            // リザルト表示
             UI.MessageBoard.Hide();
             UI.Result.Show(score, record);
             yield return new WaitForSeconds(0.5f);
@@ -171,12 +240,24 @@ namespace RPGM.Gameplay
             UI.Result.Hide();
             yield return new WaitForSeconds(1.0f);
 
-            UI.FadeScreen.FadeOut(1.0f, Color.white);
-            yield return new WaitForSeconds(1.0f);
+            UI.FadeScreen.FadeOut(1.0f, Color.black);
+            yield return new WaitForSeconds(1.5f);
 
-            yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
+            if (PhotonNetwork.OfflineMode)
+            {
+                // オフラインモードから切断
+                PhotonNetwork.OfflineMode = false;
+                yield return new WaitUntil(() => !PhotonNetwork.IsConnected);
+            }
+            else
+            {
+                // サーバーから切断
+                PhotonNetwork.Disconnect();
+                yield return new WaitUntil(() => !PhotonNetwork.IsConnected);
+            }
 
-            UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+            // ゲームシーンのリロード
+            UnityEngine.SceneManagement.SceneManager.LoadScene("TopScene");
             yield break;
         }
     }

@@ -22,6 +22,7 @@ namespace RPGM.UI
         void Awake()
         {
             instance = this;
+            fade.enabled = false;
             time = -1.0f;
         }
 

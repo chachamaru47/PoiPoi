@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 1318976432026030874}
   - component: {fileID: 7948309521016487140}
   - component: {fileID: 7688161078957832707}
+  - component: {fileID: 3650188848599760087}
   m_Layer: 0
   m_Name: Controllers
   m_TagString: Untagged
@@ -59,7 +60,7 @@ MonoBehaviour:
     inventoryController: {fileID: 0}
     musicController: {fileID: 3534774729685244126}
     cameraController: {fileID: 0}
-    powerGauge: {fileID: 0}
+    trashGenerator: {fileID: 0}
 --- !u!114 &435158885942284248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117,7 +118,7 @@ MonoBehaviour:
   onButtonExit: {fileID: 0}
   onShowDialog: {fileID: 0}
   onHideDialog: {fileID: 0}
-  onPic: {fileID: 0}
+  onPick: {fileID: 8300000, guid: 4352d1e8bbb9cb442bb61f248d9f4cf0, type: 3}
   onCollect: {fileID: 8300000, guid: d617102f0067466459a5a73c418501e7, type: 3}
   onStoryItem: {fileID: 8300000, guid: 46e6c79da3ec0f14f95bb09260978820, type: 3}
   vocals:
@@ -317,3 +318,15 @@ MonoBehaviour:
   trashCollection: {fileID: 0}
   itemBase: {fileID: 0}
   trashDatas: []
+--- !u!114 &3650188848599760087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1318976432026030867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d832e7bad1083fb469f38cc1e5b91798, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

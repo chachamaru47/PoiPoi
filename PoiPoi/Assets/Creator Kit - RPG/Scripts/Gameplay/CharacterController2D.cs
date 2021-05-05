@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using RPGM.Gameplay;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -10,7 +11,7 @@ namespace RPGM.Gameplay
     /// <summary>
     /// A simple controller for animating a 4 directional sprite using Physics.
     /// </summary>
-    public class CharacterController2D : MonoBehaviour
+    public class CharacterController2D : MonoBehaviourPunCallbacks, IPunObservable
     {
         public float speed = 1;
         public float acceleration = 2;
@@ -90,6 +91,11 @@ namespace RPGM.Gameplay
 
         void Update()
         {
+            if (!photonView.IsMine)
+            {
+                return;
+            }
+
             switch (state)
             {
                 case State.Idle:
@@ -178,7 +184,8 @@ namespace RPGM.Gameplay
                     if (bCharge)
                     {
                         bCharge = false;
-                        useItem.ThrowItem(nextMoveCommand.normalized * chargeTime * 20.0f, socket.transform.localPosition.y);
+                        Vector2 force = nextMoveCommand.normalized * chargeTime * 20.0f;
+                        photonView.RPC(nameof(RpcThrowItem), RpcTarget.AllViaServer, useItem.id, useItem.transform.position, force.x, force.y, socket.transform.localPosition.y);
                         useItem = null;
                     }
                 }
@@ -187,6 +194,11 @@ namespace RPGM.Gameplay
 
         void LateUpdate()
         {
+            if (!photonView.IsMine)
+            {
+                return;
+            }
+
             if (pixelPerfectCamera != null)
             {
                 transform.position = pixelPerfectCamera.RoundToPixel(transform.position);
@@ -205,21 +217,59 @@ namespace RPGM.Gameplay
         /// アイテムを拾う
         /// </summary>
         /// <param name="item">対象アイテム</param>
-        /// <returns>拾ったら真</returns>
-        public bool PicItem(DropItem item)
+        public void PickItem(DropItem item)
         {
             if (useItem == null)
             {
-                item.PicItem();
                 useItem = item;
-
-                // ソケットにアタッチ
-                item.gameObject.transform.SetParent(socket.transform);
-                item.gameObject.transform.localPosition = Vector3.zero;
-
-                return true;
+                photonView.RPC(nameof(RpcPickItem), RpcTarget.AllViaServer, item.id);
             }
-            return false;
+        }
+
+        /// <summary>
+        /// RPC アイテムを拾う
+        /// </summary>
+        /// <param name="itemId">アイテムID</param>
+        [PunRPC]
+        private void RpcPickItem(int itemId)
+        {
+            var item = model.trashGenerator.GetItem(itemId);
+            if (item != null)
+            {
+                // 先に誰かに拾われていないかを確認
+                if (!item.IsPicked())
+                {
+                    // 拾う
+                    item.PickItem(photonView.OwnerActorNr);
+
+                    // アイテムをソケット位置にアタッチ
+                    item.gameObject.transform.SetParent(socket.transform);
+                    item.gameObject.transform.localPosition = Vector3.zero;
+                    return;
+                }
+            }
+
+            // 拾うのに失敗
+            useItem = null;
+        }
+
+        /// <summary>
+        /// RPC アイテムを投げる
+        /// </summary>
+        /// <param name="itemId">アイテムID</param>
+        /// <param name="startPos">開始位置</param>
+        /// <param name="forceX">X方向の投げる力</param>
+        /// <param name="forceY">Y方向の投げる力</param>
+        /// <param name="aboveGround">開始時の地面からの高さ</param>
+        [PunRPC]
+        private void RpcThrowItem(int itemId, Vector3 startPos, float forceX, float forceY, float aboveGround)
+        {
+            var item = model.trashGenerator.GetItem(itemId);
+            if (item != null)
+            {
+                item.transform.position = startPos;
+                item.ThrowItem(new Vector2(forceX, forceY), aboveGround);
+            }
         }
 
         /// <summary>
@@ -236,6 +286,21 @@ namespace RPGM.Gameplay
             yield return new WaitForSeconds(0.1f);
             searchCollider.enabled = false;
             yield break;
+        }
+
+        void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            if (stream.IsWriting)
+            {
+                // 値をストリームに書き込んで送信する
+                stream.SendNext(spriteRenderer.flipX);
+            }
+            else
+            {
+                // 受信したストリームを読み込んで値を更新する
+                spriteRenderer.flipX = (bool)stream.ReceiveNext();
+                Debug.Log("mukimuki:" + spriteRenderer.flipX);
+            }
         }
     }
 }

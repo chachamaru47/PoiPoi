@@ -20,9 +20,12 @@ namespace RPGM.Gameplay
         public DropItem itemBase;
         public LotTrashData[] trashDatas;
 
+        private Dictionary<int, DropItem> itemList;
+
         // Start is called before the first frame update
         void Start()
         {
+            itemList = new Dictionary<int, DropItem>();
             Generation(1000, new Rect(-20, -15, 40, 30), 123456789);
         }
 
@@ -50,6 +53,7 @@ namespace RPGM.Gameplay
                 // 生成
                 var item = Instantiate(itemBase, pos, Quaternion.identity);
                 item.gameObject.transform.SetParent(trashCollection.transform);
+                item.id = i + 1;
 
                 // 設定するアイテムデータを抽選
                 int lot = Random.Range(0, total_weight);
@@ -65,6 +69,31 @@ namespace RPGM.Gameplay
 
                 // 最後にアクティブ化
                 item.gameObject.SetActive(true);
+
+                itemList.Add(item.id, item);
+            }
+        }
+
+        /// <summary>
+        /// 指定IDのアイテムを取得する
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public DropItem GetItem(int itemId)
+        {
+            return itemList.ContainsKey(itemId) ? itemList[itemId] : null;
+        }
+
+        /// <summary>
+        /// 指定IDのアイテムを破棄する
+        /// </summary>
+        /// <param name="itemId">アイテムID</param>
+        public void DestroyItem(int itemId)
+        {
+            if (itemList.ContainsKey(itemId))
+            {
+                Destroy(itemList[itemId].gameObject);
+                itemList.Remove(itemId);
             }
         }
     }

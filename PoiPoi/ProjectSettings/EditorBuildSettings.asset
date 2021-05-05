@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: 
     guid: 00000000000000000000000000000000
   - enabled: 1
+    path: Assets/Creator Kit - RPG/Scenes/TopScene.unity
+    guid: 64ad8ce2dcda2be4fbbdc5de99807fc0
+  - enabled: 1
     path: Assets/Creator Kit - RPG/Scenes/SampleScene.unity
     guid: 2ea7383a0a8af431080e0aa251ee7115
   m_configObjects: {}
