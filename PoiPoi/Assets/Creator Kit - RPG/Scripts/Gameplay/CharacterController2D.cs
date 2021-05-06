@@ -26,6 +26,9 @@ namespace RPGM.Gameplay
         public GameObject socket;
         public UI.PowerGauge powerGauge;
 
+        public GameObject namePlate;
+        public UnityEngine.UI.Text nameText;
+
         new Rigidbody2D rigidbody2D;
         SpriteRenderer spriteRenderer;
         PixelPerfectCamera pixelPerfectCamera;
@@ -48,11 +51,11 @@ namespace RPGM.Gameplay
         DropItem useItem = null;
 
         /// <summary>
-        /// プレイヤー番号ごとの色を取得する
+        /// プレイヤー番号ごとの文字色を取得する
         /// </summary>
         /// <param name="playerId">プレイヤー番号</param>
         /// <returns>プレイヤー色</returns>
-        public static Color GetPlayerColor(int playerId)
+        public static Color GetPlayerTextColor(int playerId)
         {
             Color color;
             switch ((playerId - 1) % 4)
@@ -62,13 +65,40 @@ namespace RPGM.Gameplay
                     color = Color.white;
                     break;
                 case 1:
-                    color = new Color(1.0f, 0.5f, 0.5f);
+                    color = Color.magenta;
                     break;
                 case 2:
-                    color = new Color(0.5f, 1.0f, 0.5f);
+                    color = Color.yellow;
                     break;
                 case 3:
-                    color = new Color(0.5f, 0.5f, 1.0f);
+                    color = Color.cyan;
+                    break;
+            }
+            return color;
+        }
+
+        /// <summary>
+        /// プレイヤー番号ごとのキャラ色を取得する
+        /// </summary>
+        /// <param name="playerId">プレイヤー番号</param>
+        /// <returns>プレイヤー色</returns>
+        public static Color GetPlayerCharacterColor(int playerId)
+        {
+            Color color;
+            switch ((playerId - 1) % 4)
+            {
+                default:
+                case 0:
+                    color = Color.white;
+                    break;
+                case 1:
+                    color = new Color(1.0f, 0.5f, 1.0f);
+                    break;
+                case 2:
+                    color = new Color(1.0f, 1.0f, 0.0f);
+                    break;
+                case 3:
+                    color = new Color(0.5f, 0.1f, 1.0f);
                     break;
             }
             return color;
@@ -236,9 +266,13 @@ namespace RPGM.Gameplay
         {
             rigidbody2D = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
-            spriteRenderer.color = GetPlayerColor(photonView.OwnerActorNr);
+            spriteRenderer.color = GetPlayerCharacterColor(photonView.OwnerActorNr);
             pixelPerfectCamera = GameObject.FindObjectOfType<PixelPerfectCamera>();
             searchCollider.enabled = false;
+
+            nameText.text = $"{photonView.OwnerActorNr}P";
+            nameText.color = GetPlayerTextColor(photonView.OwnerActorNr);
+            namePlate.SetActive(!PhotonNetwork.OfflineMode);
         }
 
         /// <summary>

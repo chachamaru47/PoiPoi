@@ -49,6 +49,7 @@ namespace RPGM.Gameplay
                     var eff = Instantiate(pointEffect, collider.transform.position, Quaternion.identity);
                     eff.gameObject.transform.SetParent(transform);
                     eff.textMeshPro.text = score.ToString();
+                    eff.textMeshPro.color = CharacterController2D.GetPlayerTextColor(item.ownerId);
                 }
 
                 // アイテムは削除
