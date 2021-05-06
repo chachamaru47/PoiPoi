@@ -47,6 +47,33 @@ namespace RPGM.Gameplay
 
         DropItem useItem = null;
 
+        /// <summary>
+        /// プレイヤー番号ごとの色を取得する
+        /// </summary>
+        /// <param name="playerId">プレイヤー番号</param>
+        /// <returns>プレイヤー色</returns>
+        public static Color GetPlayerColor(int playerId)
+        {
+            Color color;
+            switch ((playerId - 1) % 4)
+            {
+                default:
+                case 0:
+                    color = Color.white;
+                    break;
+                case 1:
+                    color = new Color(1.0f, 0.5f, 0.5f);
+                    break;
+                case 2:
+                    color = new Color(0.5f, 1.0f, 0.5f);
+                    break;
+                case 3:
+                    color = new Color(0.5f, 0.5f, 1.0f);
+                    break;
+            }
+            return color;
+        }
+
         void IdleState()
         {
             if (nextMoveCommand != Vector3.zero)
@@ -209,6 +236,7 @@ namespace RPGM.Gameplay
         {
             rigidbody2D = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer.color = GetPlayerColor(photonView.OwnerActorNr);
             pixelPerfectCamera = GameObject.FindObjectOfType<PixelPerfectCamera>();
             searchCollider.enabled = false;
         }
