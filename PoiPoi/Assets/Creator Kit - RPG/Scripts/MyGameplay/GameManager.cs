@@ -38,11 +38,11 @@ namespace RPGM.Gameplay
 
         public GamePhaseType GamePhase { get; set; }
         public bool Practice { get => roomProperty_practice; set => roomProperty_practice = value; }
-        public int PlayerId { get => playerId; }
+        public int PlayerGameNo { get => PhotonNetwork.LocalPlayer?.GetGameNo() ?? -1; }
 
-        int score;
-        float record;
-
+        /// <summary>
+        /// Photonルームプロパティ：ゲーム開始フラグ
+        /// </summary>
         bool roomProperty_start
         {
             get => (PhotonNetwork.CurrentRoom?.CustomProperties["Start"] is bool value) ? value : false;
@@ -57,6 +57,9 @@ namespace RPGM.Gameplay
             }
         }
 
+        /// <summary>
+        /// Photonルームプロパティ：プラクティスモードフラグ
+        /// </summary>
         bool roomProperty_practice
         {
             get => (PhotonNetwork.CurrentRoom?.CustomProperties["Practice"] is bool value) ? value : false;
@@ -71,22 +74,13 @@ namespace RPGM.Gameplay
             }
         }
 
-        int playerId
-        {
-            get => PhotonNetwork.LocalPlayer?.ActorNumber ?? -1;
-        }
-
-        private void Awake()
-        {
-            score = 0;
-            record = -1.0f;
-            GamePhase = GamePhaseType.Opening;
-        }
-
         // Start is called before the first frame update
         void Start()
         {
-            UI.Score.SetScore(score);
+            GamePhase = GamePhaseType.Opening;
+            PhotonNetwork.LocalPlayer.SetRecord(-1.0f);
+            PhotonNetwork.LocalPlayer.SetScore(0);
+            UI.Score.SetScore(0);
             UI.Timer.SetTime(timer);
 
             // オープニングシーン開始
@@ -127,7 +121,8 @@ namespace RPGM.Gameplay
         {
             if (Practice) { return; }
 
-            score += point;
+            int score = PhotonNetwork.LocalPlayer.GetScore() + point;
+            PhotonNetwork.LocalPlayer.SetScore(score);
             UI.Score.SetScore(score);
         }
 
@@ -141,10 +136,10 @@ namespace RPGM.Gameplay
             // 練習モード中は記録更新しない
             if (Practice) { return false; }
 
-            if (record < distance)
+            if (PhotonNetwork.LocalPlayer.GetRecord() < distance)
             {
                 // 記録更新した
-                record = distance;
+                PhotonNetwork.LocalPlayer.SetRecord(distance);
                 return true;
             }
             return false;
@@ -182,28 +177,44 @@ namespace RPGM.Gameplay
             // Photonがルームに入室するまで待つ
             yield return new WaitUntil(() => PhotonNetwork.InRoom);
 
-            UI.MessageBoard.Show(
-                "Move : R Stick\n" +
-                "Pick or Charge : A\n" +
-                "Dash : R Trigger\n" +
-                "Stay : L Trigger",
-                PhotonNetwork.IsMasterClient);
-            yield return new WaitForSeconds(0.5f);
-
-            // マスターの人がボタン押下したらゲーム開始
-            if (PhotonNetwork.IsMasterClient)
+            // プレイヤーのゲーム番号が決まるまでループ（他のプレイヤーと重複させないための処理）
+            for (int i = 0; ; i = (i + 1) % NetworkManager.RoomMaxPlayers)
             {
-                yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
-                PhotonNetwork.CurrentRoom.IsOpen = false;
-                roomProperty_start = true;
+                // いったん設定して、その設定が返ってくるのを待つ
+                PhotonNetwork.LocalPlayer.SetGameNo(i);
+                yield return new WaitUntil(() => PhotonNetwork.LocalPlayer.GetGameNo() == i);
+
+                // 他に同じ番号を設定しているプレイヤーが居なければOK
+                if (!System.Array.Exists(PhotonNetwork.PlayerListOthers, p => p.GetGameNo() == i))
+                {
+                    // 設定OK
+                    PhotonNetwork.LocalPlayer.SetReady(true);
+                    break;
+                }
             }
-            yield return new WaitUntil(() => roomProperty_start);
+
+            // ゲーム開始前の待機画面　オンラインの場合他のユーザーを待ったりする
+            bool lobbyWait = true;
+            bool lobbyResult = false;
+            StartCoroutine(LobbyCoroutine(r =>
+            {
+                lobbyResult = r;
+                lobbyWait = false;
+            }));
+            yield return new WaitWhile(() => lobbyWait);
+            if(!lobbyResult)
+            {
+                // トップメニューに戻る
+                StartCoroutine(ReturnTopMenu());
+                yield break;
+            }
 
             // ランダムな座標に自身のアバター（ネットワークオブジェクト）を生成する
             Random.InitState((int)(Time.time * 100));
             var position = new Vector3(Random.Range(2f, 4f), Random.Range(9f, 11f));
             var player_obj = PhotonNetwork.Instantiate("Character", position, Quaternion.identity);
             model.player = player_obj.GetComponent<CharacterController2D>();
+
             UI.MessageBoard.Show("Let's ....");
             yield return new WaitForSeconds(1.5f);
 
@@ -219,9 +230,88 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
+        /// ロビーシーンコルーチン
+        /// </summary>
+        /// <param name="endCallback">
+        /// ロビー終了コールバック
+        /// ゲーム開始なら真、ゲームから抜けたら偽を返す
+        /// </param>
+        /// <returns>IEnumerator</returns>
+        private IEnumerator LobbyCoroutine(UnityEngine.Events.UnityAction<bool> endCallback)
+        {
+            if (!PhotonNetwork.OfflineMode)
+            {
+                UI.Lobby.Show();
+            }
+
+            // ゲーム開始待ち
+            while (!roomProperty_start)
+            {
+                // 準備完了したユーザーの表示
+                if (!PhotonNetwork.OfflineMode)
+                {
+                    bool[] readyPlayers = new bool[NetworkManager.RoomMaxPlayers];
+                    foreach (var player in PhotonNetwork.PlayerList)
+                    {
+                        if (player.GetReady())
+                        {
+                            int no = player.GetGameNo();
+                            UI.Lobby.PlayerOn(no, player.IsLocal);
+                            readyPlayers[no] = true;
+                        }
+                    }
+                    for (int i = 0; i < NetworkManager.RoomMaxPlayers; i++)
+                    {
+                        if (!readyPlayers[i])
+                        {
+                            UI.Lobby.PlayerOff(i);
+                        }
+                    }
+                }
+
+                // 操作説明表示
+                UI.MessageBoard.Show(
+                    "Move : R Stick\n" +
+                    "Pick or Charge : A\n" +
+                    "Dash : R Trigger\n" +
+                    "Stay : L Trigger\n",
+                    PhotonNetwork.IsMasterClient);
+
+                // マスターの人がボタン押下したらゲーム開始
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    if (Input.GetButtonDown("Submit"))
+                    {
+                        PhotonNetwork.CurrentRoom.IsOpen = false;
+                        roomProperty_start = true;
+                        break;
+                    }
+                }
+
+                // キャンセルボタン押下した人はゲームから抜ける
+                if (Input.GetButtonDown("Cancel"))
+                {
+                    // ゲームから抜ける
+                    endCallback?.Invoke(false);
+                    yield break;
+                }
+
+                yield return null;
+            }
+
+            // ロビーを閉じてしゲーム開始
+            if (!PhotonNetwork.OfflineMode)
+            {
+                UI.Lobby.Hide();
+            }
+            endCallback?.Invoke(true);
+            yield break;
+        }
+
+        /// <summary>
         /// エンディングシーンコルーチン
         /// </summary>
-        /// <returns></returns>
+        /// <returns>IEnumerator</returns>
         private IEnumerator EndingCoroutine()
         {
             GamePhase = GamePhaseType.Ending;
@@ -232,7 +322,7 @@ namespace RPGM.Gameplay
 
             // リザルト表示
             UI.MessageBoard.Hide();
-            UI.Result.Show(score, record);
+            UI.Result.Show(PhotonNetwork.LocalPlayer.GetScore(), PhotonNetwork.LocalPlayer.GetRecord());
             yield return new WaitForSeconds(0.5f);
 
             yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
@@ -243,6 +333,17 @@ namespace RPGM.Gameplay
             UI.FadeScreen.FadeOut(1.0f, Color.black);
             yield return new WaitForSeconds(1.5f);
 
+            // トップメニューに戻る
+            StartCoroutine(ReturnTopMenu());
+            yield break;
+        }
+
+        /// <summary>
+        /// トップメニューに戻るコルーチン
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator ReturnTopMenu()
+        {
             if (PhotonNetwork.OfflineMode)
             {
                 // オフラインモードから切断
@@ -256,7 +357,7 @@ namespace RPGM.Gameplay
                 yield return new WaitUntil(() => !PhotonNetwork.IsConnected);
             }
 
-            // ゲームシーンのリロード
+            // トップシーンのロード
             UnityEngine.SceneManagement.SceneManager.LoadScene("TopScene");
             yield break;
         }

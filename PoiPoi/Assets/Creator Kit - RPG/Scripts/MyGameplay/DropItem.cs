@@ -14,7 +14,7 @@ namespace RPGM.Gameplay
     public class DropItem : MonoBehaviour
     {
         public int id;
-        public int ownerId = -1;
+        public int ownerGameNo = -1;
         public TrashData data;
 
         public SpriteRenderer body;
@@ -63,9 +63,10 @@ namespace RPGM.Gameplay
         /// <summary>
         /// 拾われる
         /// </summary>
-        public void PickItem(int playerId)
+        /// <param name="playerGameNo">拾ったプレイヤーのゲーム番号</param>
+        public void PickItem(int playerGameNo)
         {
-            ownerId = playerId;
+            ownerGameNo = playerGameNo;
 
             // 拾われている間当たり判定は消しておく
             collider2d.enabled = false;

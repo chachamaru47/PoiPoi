@@ -27,7 +27,7 @@ namespace RPGM.Gameplay
         public UI.PowerGauge powerGauge;
 
         public GameObject namePlate;
-        public UnityEngine.UI.Text nameText;
+        public TMPro.TextMeshProUGUI nameText;
 
         new Rigidbody2D rigidbody2D;
         SpriteRenderer spriteRenderer;
@@ -51,14 +51,14 @@ namespace RPGM.Gameplay
         DropItem useItem = null;
 
         /// <summary>
-        /// プレイヤー番号ごとの文字色を取得する
+        /// プレイヤーのゲーム番号ごとの文字色を取得する
         /// </summary>
-        /// <param name="playerId">プレイヤー番号</param>
+        /// <param name="playerGameNo">プレイヤーゲーム番号</param>
         /// <returns>プレイヤー色</returns>
-        public static Color GetPlayerTextColor(int playerId)
+        public static Color GetPlayerTextColor(int playerGameNo)
         {
             Color color;
-            switch ((playerId - 1) % 4)
+            switch (playerGameNo % 4)
             {
                 default:
                 case 0:
@@ -78,14 +78,14 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
-        /// プレイヤー番号ごとのキャラ色を取得する
+        /// プレイヤーのゲーム番号ごとのキャラ色を取得する
         /// </summary>
-        /// <param name="playerId">プレイヤー番号</param>
+        /// <param name="playerGameNo">プレイヤーゲーム番号</param>
         /// <returns>プレイヤー色</returns>
-        public static Color GetPlayerCharacterColor(int playerId)
+        public static Color GetPlayerCharacterColor(int playerGameNo)
         {
             Color color;
-            switch ((playerId - 1) % 4)
+            switch (playerGameNo % 4)
             {
                 default:
                 case 0:
@@ -127,7 +127,7 @@ namespace RPGM.Gameplay
             if (useItem != null)
             {
                 // アイテムの重さを見て減速
-                apply_speed *= Mathf.Clamp(Mathf.Lerp(1.0f, 0.0f, useItem.data.mass / 5.0f), 0.1f, 1.0f);
+                apply_speed *= Mathf.Lerp(1.0f, 0.1f, useItem.data.mass / 5.0f);
             }
             rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity, move_command * apply_speed, ref currentVelocity, acceleration, speed);
             spriteRenderer.flipX = (moveBrake ? nextMoveCommand.x : rigidbody2D.velocity.x) >= 0 ? true : false;
@@ -264,14 +264,16 @@ namespace RPGM.Gameplay
 
         void Awake()
         {
+            int ownerGameNo = photonView.Owner.GetGameNo();
+
             rigidbody2D = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
-            spriteRenderer.color = GetPlayerCharacterColor(photonView.OwnerActorNr);
+            spriteRenderer.color = GetPlayerCharacterColor(ownerGameNo);
             pixelPerfectCamera = GameObject.FindObjectOfType<PixelPerfectCamera>();
             searchCollider.enabled = false;
 
-            nameText.text = $"{photonView.OwnerActorNr}P";
-            nameText.color = GetPlayerTextColor(photonView.OwnerActorNr);
+            nameText.text = $"{ownerGameNo + 1}P";
+            nameText.color = GetPlayerTextColor(ownerGameNo);
             namePlate.SetActive(!PhotonNetwork.OfflineMode);
         }
 
@@ -302,7 +304,7 @@ namespace RPGM.Gameplay
                 if (!item.IsPicked())
                 {
                     // 拾う
-                    item.PickItem(photonView.OwnerActorNr);
+                    item.PickItem(photonView.Owner.GetGameNo());
 
                     // アイテムをソケット位置にアタッチ
                     item.gameObject.transform.SetParent(socket.transform);

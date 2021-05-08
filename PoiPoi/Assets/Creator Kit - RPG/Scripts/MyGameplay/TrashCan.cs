@@ -32,7 +32,7 @@ namespace RPGM.Gameplay
                     float distance = item.GetFlyingDistance();
                     int score = (int)(item.data.score * distance);
                     // 自分の投げたアイテムのみ加点処理
-                    if (item.ownerId == model.gameManager.PlayerId)
+                    if (item.ownerGameNo == model.gameManager.PlayerGameNo)
                     {
                         // 加点
                         model.gameManager.AddScore(score);
@@ -49,7 +49,7 @@ namespace RPGM.Gameplay
                     var eff = Instantiate(pointEffect, collider.transform.position, Quaternion.identity);
                     eff.gameObject.transform.SetParent(transform);
                     eff.textMeshPro.text = score.ToString();
-                    eff.textMeshPro.color = CharacterController2D.GetPlayerTextColor(item.ownerId);
+                    eff.textMeshPro.color = CharacterController2D.GetPlayerTextColor(item.ownerGameNo);
                 }
 
                 // アイテムは削除

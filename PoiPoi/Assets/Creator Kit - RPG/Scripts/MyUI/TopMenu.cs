@@ -4,11 +4,24 @@ using UnityEngine;
 
 namespace RPGM.UI
 {
+    /// <summary>
+    /// トップメニュー
+    /// </summary>
     public class TopMenu : MonoBehaviour
     {
+        /// <summary>
+        /// ゲームモード
+        /// </summary>
         enum GameMode
         {
+            /// <summary>
+            /// オフラインゲーム
+            /// </summary>
             OfflineMode,
+
+            /// <summary>
+            /// オンラインゲーム
+            /// </summary>
             OnlineMode,
         }
 
@@ -58,6 +71,10 @@ namespace RPGM.UI
             }
         }
 
+        /// <summary>
+        /// カーソル位置の設定
+        /// </summary>
+        /// <param name="mode">カーソルが合っているゲームモード</param>
         private void SetCursor(GameMode mode)
         {
             cursorPos = mode;
@@ -67,6 +84,10 @@ namespace RPGM.UI
             }
         }
 
+        /// <summary>
+        /// ゲームスタートコルーチン
+        /// </summary>
+        /// <returns>IEnumerator</returns>
         private IEnumerator StartGameCoroutine()
         {
             audioSource.PlayOneShot(onDecide);
@@ -74,7 +95,7 @@ namespace RPGM.UI
             yield return new WaitForSeconds(0.5f);
 
             Gameplay.NetworkManager.IsOnlineMode = (cursorPos == GameMode.OnlineMode);
-            UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
             yield break;
         }
     }
