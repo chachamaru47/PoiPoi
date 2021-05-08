@@ -80,7 +80,6 @@ namespace RPGM.Gameplay
             GamePhase = GamePhaseType.Opening;
             PhotonNetwork.LocalPlayer.SetRecord(-1.0f);
             PhotonNetwork.LocalPlayer.SetScore(0);
-            UI.Score.SetScore(0);
             UI.Timer.SetTime(timer);
 
             // オープニングシーン開始
@@ -111,6 +110,15 @@ namespace RPGM.Gameplay
                     UI.Timer.SetTime(timer);
                 }
             }
+
+            // 全プレイヤーのスコア表示を更新
+            foreach(var player in PhotonNetwork.PlayerList)
+            {
+                if (player.GetReady())
+                {
+                    model.scores[player.GetGameNo()].SetScore(player.GetScore());
+                }
+            }
         }
 
         /// <summary>
@@ -123,7 +131,6 @@ namespace RPGM.Gameplay
 
             int score = PhotonNetwork.LocalPlayer.GetScore() + point;
             PhotonNetwork.LocalPlayer.SetScore(score);
-            UI.Score.SetScore(score);
         }
 
         /// <summary>
@@ -223,7 +230,17 @@ namespace RPGM.Gameplay
 
             model.cameraController.SetDefaultFocus(model.player.transform);
             UI.MessageBoard.Hide();
-            UI.Score.Show();
+            for (int i = 0; i < model.scores.Length; i++)
+            {
+                if(System.Array.Exists(PhotonNetwork.PlayerList, p=>p.GetGameNo()==i))
+                {
+                    model.scores[i].Show();
+                }
+                else
+                {
+                    model.scores[i].Hide();
+                }
+            }
             UI.Timer.Show();
             GamePhase = GamePhaseType.InGame;
             yield break;
@@ -250,19 +267,14 @@ namespace RPGM.Gameplay
                 // 準備完了したユーザーの表示
                 if (!PhotonNetwork.OfflineMode)
                 {
-                    bool[] readyPlayers = new bool[NetworkManager.RoomMaxPlayers];
-                    foreach (var player in PhotonNetwork.PlayerList)
-                    {
-                        if (player.GetReady())
-                        {
-                            int no = player.GetGameNo();
-                            UI.Lobby.PlayerOn(no, player.IsLocal);
-                            readyPlayers[no] = true;
-                        }
-                    }
                     for (int i = 0; i < NetworkManager.RoomMaxPlayers; i++)
                     {
-                        if (!readyPlayers[i])
+                        var player = System.Array.Find(PhotonNetwork.PlayerList, p => p.GetGameNo() == i);
+                        if (player != null && player.GetReady())
+                        {
+                            UI.Lobby.PlayerOn(i, player.IsLocal);
+                        }
+                        else
                         {
                             UI.Lobby.PlayerOff(i);
                         }
@@ -315,7 +327,10 @@ namespace RPGM.Gameplay
         private IEnumerator EndingCoroutine()
         {
             GamePhase = GamePhaseType.Ending;
-            UI.Score.Hide();
+            for (int i = 0; i < model.scores.Length; i++)
+            {
+                model.scores[i].Hide();
+            }
             UI.Timer.Hide();
             UI.MessageBoard.Show("Finish !!!!");
             yield return new WaitForSeconds(3.0f);

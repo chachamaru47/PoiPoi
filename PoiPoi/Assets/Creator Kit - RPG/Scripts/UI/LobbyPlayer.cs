@@ -17,12 +17,19 @@ namespace RPGM.UI
         /// プレイヤーのゲーム番号を設定
         /// </summary>
         /// <param name="playerGameNo">プレイヤーゲーム番号</param>
-        public void SetPlayerGameNo(int playerGameNo)
+        /// <param name="showNo">ゲーム番号を表示するか</param>
+        public void SetPlayerGameNo(int playerGameNo, bool showNo)
         {
             Color textColor = Gameplay.CharacterController2D.GetPlayerTextColor(playerGameNo);
             noText.text = $"{playerGameNo + 1}P";
             noText.color = textColor;
+            noText.enabled = showNo;
             youText.color = textColor;
+            if (!showNo)
+            {
+                // 番号非表示の時は上に空間が空くのでキャラ座標を少し上げる
+                player.rectTransform.localPosition += new Vector3(0, 12, 0);
+            }
             player.color = Gameplay.CharacterController2D.GetPlayerCharacterColor(playerGameNo);
         }
 

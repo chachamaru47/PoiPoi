@@ -22,6 +22,7 @@ namespace RPGM.Gameplay
         public MusicController musicController;
         public CameraController cameraController;
         public TrashGenerator trashGenerator;
+        public Score[] scores;
 
         Dictionary<GameObject, HashSet<string>> conversations = new Dictionary<GameObject, HashSet<string>>();
 
