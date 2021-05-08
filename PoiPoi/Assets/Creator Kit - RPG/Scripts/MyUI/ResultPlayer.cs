@@ -19,10 +19,11 @@ namespace RPGM.UI
         /// </summary>
         /// <param name="playerGameNo">プレイヤーゲーム番号</param>
         /// <param name="you">自分である表示をするか</param>
-        /// <param name="winner">勝者表示をするか</param>
         /// <param name="score">スコア</param>
         /// <param name="record">レコード</param>
-        public void Show(int playerGameNo, bool you, bool winner, int score, float record)
+        /// <param name="winner">勝者表示をするか</param>
+        /// <param name="longest">最長記録表示をするか</param>
+        public void Show(int playerGameNo, bool you, int score, float record, bool winner, bool longest)
         {
             // 記録なしは0表示
             if (record < 0.0f) { record = 0.0f; }
@@ -36,7 +37,9 @@ namespace RPGM.UI
             player.Show(you);
             textMeshProUGUIWinner.enabled = winner;
             textMeshProUGUIScore.text = score.ToString();
+            textMeshProUGUIScore.color = (winner) ? Color.red : Color.white;
             textMeshProUGUIRecord.text = $"{record.ToString("0.00")}m";
+            textMeshProUGUIRecord.color = (longest) ? Color.red : Color.white;
 
             gameObject.SetActive(true);
         }

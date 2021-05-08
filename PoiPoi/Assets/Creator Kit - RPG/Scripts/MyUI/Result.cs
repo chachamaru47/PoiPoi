@@ -37,12 +37,13 @@ namespace RPGM.UI
         /// </summary>
         /// <param name="playerGameNo">プレイヤーゲーム番号</param>
         /// <param name="you">自分である表示をするか</param>
-        /// <param name="winner">勝者表示をするか</param>
         /// <param name="score">スコア</param>
         /// <param name="record">レコード</param>
-        public static void ShowPlayer(int playerGameNo, bool you, bool winner, int score, float record)
+        /// <param name="winner">勝者表示をするか</param>
+        /// <param name="longest">最長記録表示をするか</param>
+        public static void ShowPlayer(int playerGameNo, bool you, int score, float record, bool winner, bool longest)
         {
-            instance.resultPlayers[playerGameNo].Show(playerGameNo, you, winner, score, record);
+            instance.resultPlayers[playerGameNo].Show(playerGameNo, you, score, record, winner, longest);
         }
 
         /// <summary>
