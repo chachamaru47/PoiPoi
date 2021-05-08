@@ -189,6 +189,23 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
+        /// 全プレイヤーの中で最長の記録を取得
+        /// </summary>
+        /// <returns>最大得点</returns>
+        private float GetMaxRecord()
+        {
+            float maxRecord = 0;
+            foreach (var player in PhotonNetwork.PlayerList)
+            {
+                if (maxRecord < player.GetRecord())
+                {
+                    maxRecord = player.GetRecord();
+                }
+            }
+            return maxRecord;
+        }
+
+        /// <summary>
         /// オープニングシーンコルーチン
         /// </summary>
         /// <returns>IEnumerator</returns>
@@ -357,13 +374,15 @@ namespace RPGM.Gameplay
             foreach(var player in PhotonNetwork.PlayerList)
             {
                 bool you = false;
-                bool win = false;
+                bool winner = false;
+                bool longest = false;
                 if (!PhotonNetwork.OfflineMode)
                 {
                     you = player.IsLocal;
-                    win = player.GetScore() >= GetMaxScore();
+                    winner = player.GetScore() >= GetMaxScore();
+                    longest = player.GetRecord() >= GetMaxRecord();
                 }
-                UI.Result.ShowPlayer(player.GetGameNo(), you, win, player.GetScore(), player.GetRecord());
+                UI.Result.ShowPlayer(player.GetGameNo(), you, player.GetScore(), player.GetRecord(), winner, longest);
             }
             UI.Result.Show();
             yield return new WaitForSeconds(0.5f);
