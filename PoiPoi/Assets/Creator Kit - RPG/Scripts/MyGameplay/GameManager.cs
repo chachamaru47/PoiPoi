@@ -172,6 +172,23 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
+        /// 全プレイヤーの中で最大の得点を取得
+        /// </summary>
+        /// <returns>最大得点</returns>
+        private int GetMaxScore()
+        {
+            int maxScore = 0;
+            foreach (var player in PhotonNetwork.PlayerList)
+            {
+                if (maxScore < player.GetScore())
+                {
+                    maxScore = player.GetScore();
+                }
+            }
+            return maxScore;
+        }
+
+        /// <summary>
         /// オープニングシーンコルーチン
         /// </summary>
         /// <returns>IEnumerator</returns>
@@ -337,7 +354,18 @@ namespace RPGM.Gameplay
 
             // リザルト表示
             UI.MessageBoard.Hide();
-            UI.Result.Show(PhotonNetwork.LocalPlayer.GetScore(), PhotonNetwork.LocalPlayer.GetRecord());
+            foreach(var player in PhotonNetwork.PlayerList)
+            {
+                bool you = false;
+                bool win = false;
+                if (!PhotonNetwork.OfflineMode)
+                {
+                    you = player.IsLocal;
+                    win = player.GetScore() >= GetMaxScore();
+                }
+                UI.Result.ShowPlayer(player.GetGameNo(), you, win, player.GetScore(), player.GetRecord());
+            }
+            UI.Result.Show();
             yield return new WaitForSeconds(0.5f);
 
             yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
