@@ -6,43 +6,44 @@ namespace RPGM.UI
 {
     /// <summary>
     /// スコア表示UI
-    /// とりあえずシングルトン
     /// </summary>
     public class Score : MonoBehaviour
     {
+        public LobbyPlayer player;
+        public int playerGameNo;
         public TMPro.TextMeshProUGUI textMeshProUGUI;
-
-        static Score instance;
 
         void Awake()
         {
-            instance = this;
+            player.SetPlayerGameNo(playerGameNo, Gameplay.NetworkManager.IsOnlineMode);
+            player.Show(false);
+            SetScore(0);
             Hide();
         }
 
         /// <summary>
         /// 表示する
         /// </summary>
-        public static void Show()
+        public void Show()
         {
-            instance.gameObject.SetActive(true);
+            gameObject.SetActive(true);
         }
 
         /// <summary>
         /// 非表示にする
         /// </summary>
-        public static void Hide()
+        public void Hide()
         {
-            instance.gameObject.SetActive(false);
+            gameObject.SetActive(false);
         }
 
         /// <summary>
         /// 得点を設定
         /// </summary>
         /// <param name="score">得点</param>
-        public static void SetScore(int score)
+        public void SetScore(int score)
         {
-            instance.textMeshProUGUI.text = score.ToString();
+            textMeshProUGUI.text = score.ToString();
         }
     }
 }

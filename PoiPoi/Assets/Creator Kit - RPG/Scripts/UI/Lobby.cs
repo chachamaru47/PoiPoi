@@ -27,7 +27,7 @@ namespace RPGM.UI
             {
                 var player = Instantiate(lobbyPlayerBase);
                 player.transform.SetParent(players);
-                player.SetPlayerGameNo(i);
+                player.SetPlayerGameNo(i, Gameplay.NetworkManager.IsOnlineMode);
                 player.Hide();
                 playerList.Add(player);
             }
