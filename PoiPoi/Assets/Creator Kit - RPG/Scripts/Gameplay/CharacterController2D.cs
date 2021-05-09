@@ -240,10 +240,8 @@ namespace RPGM.Gameplay
                     // チャージ中ならアイテム投射
                     if (bCharge)
                     {
-                        bCharge = false;
                         Vector2 force = nextMoveCommand.normalized * chargeTime * 20.0f;
-                        photonView.RPC(nameof(RpcThrowItem), RpcTarget.AllViaServer, useItem.id, useItem.transform.position, force.x, force.y, socket.transform.localPosition.y);
-                        useItem = null;
+                        ThrowItem(force);
                     }
                 }
             }
@@ -267,6 +265,11 @@ namespace RPGM.Gameplay
             int ownerGameNo = photonView.Owner.GetGameNo();
 
             rigidbody2D = GetComponent<Rigidbody2D>();
+            if (!photonView.IsMine)
+            {
+                // 自分のキャラ以外は挙動を通信で受け取るので物理で動かないようにしておく
+                rigidbody2D.bodyType = RigidbodyType2D.Static;
+            }
             spriteRenderer = GetComponent<SpriteRenderer>();
             spriteRenderer.color = GetPlayerCharacterColor(ownerGameNo);
             pixelPerfectCamera = GameObject.FindObjectOfType<PixelPerfectCamera>();
@@ -318,6 +321,20 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
+        /// アイテムを投げる
+        /// </summary>
+        /// <param name="force">投げる力</param>
+        public void ThrowItem(Vector2 force)
+        {
+            if (useItem != null)
+            {
+                bCharge = false;
+                photonView.RPC(nameof(RpcThrowItem), RpcTarget.AllViaServer, useItem.id, useItem.transform.position, force.x, force.y, socket.transform.localPosition.y);
+                useItem = null;
+            }
+        }
+
+        /// <summary>
         /// RPC アイテムを投げる
         /// </summary>
         /// <param name="itemId">アイテムID</param>
@@ -363,7 +380,21 @@ namespace RPGM.Gameplay
             {
                 // 受信したストリームを読み込んで値を更新する
                 spriteRenderer.flipX = (bool)stream.ReceiveNext();
-                Debug.Log("mukimuki:" + spriteRenderer.flipX);
+            }
+        }
+
+        /// <summary>
+        /// 他のコライダーと衝突した時
+        /// </summary>
+        /// <param name="collision">衝突相手のコリジョン</param>
+        public void OnCollisionEnter2D(Collision2D collision)
+        {
+            // 衝突相手がキャラクターなら
+            var targetChara = collision.gameObject.GetComponent<CharacterController2D>();
+            if (targetChara != null)
+            {
+                // 相手がアイテムを投げだす
+                targetChara.ThrowItem(Vector2.zero);
             }
         }
     }
