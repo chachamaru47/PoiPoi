@@ -31,7 +31,7 @@ namespace RPGM.UI
             MonitoringQuitInput();
 
             // 練習モード切り替え
-            if (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown("joystick button 3"))
+            if (Input.GetButtonDown("Jump"))
             {
                 model.gameManager.Practice = !model.gameManager.Practice;
             }
@@ -86,7 +86,7 @@ namespace RPGM.UI
             model.player.nextMoveCommand += Vector3.right * Input.GetAxis("Horizontal");
             if (model.player.nextMoveCommand.magnitude > deadZone)
             {
-                float dash = Input.GetAxis("Dash");
+                float dash = Input.GetAxis("Dash_Stay");
                 float accel = 1.0f + accelMax * ((dash > 0.01f) ? dash : Input.GetButton("Dash") ? 1.0f : 0.0f);
                 model.player.nextMoveCommand *= accel * stepSize;
             }
@@ -103,7 +103,7 @@ namespace RPGM.UI
             {
                 model.player.releaseFire = true;
             }
-            model.player.moveBrake = (Input.GetAxis("Dash") < -0.01f);
+            model.player.moveBrake = (Input.GetAxis("Dash_Stay") < -0.01f) || Input.GetButton("Stay");
         }
 
         /// <summary>
