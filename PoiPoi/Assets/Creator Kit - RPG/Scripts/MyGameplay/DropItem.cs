@@ -167,19 +167,23 @@ namespace RPGM.Gameplay
                     aboveGround -= 5.0f * Time.deltaTime;
                 }
 
-                // 飛距離が大きくなったらこのアイテムにフォーカスを移してカメラを引く
-                if(!camera_focus && GetFlyingDistance() > 5.0f)
+                // 自分の投げたアイテムの場合カメラを制御
+                if (ownerGameNo == model.gameManager.PlayerGameNo)
                 {
-                    camera_focus = true;
-                    model.cameraController.SetFocus(transform);
-                }
-                // 飛距離が大きくなりすぎた時このアイテムをフォーカスしたままだったらフォーカスをお返しする
-                if (!camera_out_focus && GetFlyingDistance() > 30.0f)
-                {
-                    camera_out_focus = true;
-                    if (model.cameraController.IsTargetFocus(transform))
+                    // 飛距離が大きくなったらこのアイテムにフォーカスを移してカメラを引く
+                    if (!camera_focus && GetFlyingDistance() > 5.0f)
                     {
-                        model.cameraController.ResetFocus();
+                        camera_focus = true;
+                        model.cameraController.SetFocus(transform);
+                    }
+                    // 飛距離が大きくなりすぎた時このアイテムをフォーカスしたままだったらフォーカスをお返しする
+                    if (!camera_out_focus && GetFlyingDistance() > 30.0f)
+                    {
+                        camera_out_focus = true;
+                        if (model.cameraController.IsTargetFocus(transform))
+                        {
+                            model.cameraController.ResetFocus();
+                        }
                     }
                 }
 
@@ -195,10 +199,14 @@ namespace RPGM.Gameplay
             rigidbody2d.velocity = Vector2.zero;
             // 当たり判定をオン
             collider2d.enabled = true;
-            // カメラがこのアイテムをフォーカスしたままだったらフォーカスをお返しする
-            if(model.cameraController.IsTargetFocus(transform))
+            // 自分の投げたアイテムの場合カメラを制御
+            if (ownerGameNo == model.gameManager.PlayerGameNo)
             {
-                model.cameraController.ResetFocus();
+                // カメラがこのアイテムをフォーカスしたままだったらフォーカスをお返しする
+                if (model.cameraController.IsTargetFocus(transform))
+                {
+                    model.cameraController.ResetFocus();
+                }
             }
 
             yield break;
