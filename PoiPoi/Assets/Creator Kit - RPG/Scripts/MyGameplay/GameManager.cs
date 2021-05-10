@@ -78,8 +78,7 @@ namespace RPGM.Gameplay
         void Start()
         {
             GamePhase = GamePhaseType.Opening;
-            PhotonNetwork.LocalPlayer.SetRecord(-1.0f);
-            PhotonNetwork.LocalPlayer.SetScore(0);
+            PhotonNetwork.LocalPlayer.SetScoreAndRecord(0, -1.0f);
             UI.Timer.SetTime(timer);
 
             // オープニングシーン開始
@@ -122,34 +121,29 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
-        /// 得点加算
+        /// スコアの追加と記録更新判定
         /// </summary>
-        /// <param name="point">点数</param>
-        public void AddScore(int point)
-        {
-            if (Practice) { return; }
-
-            int score = PhotonNetwork.LocalPlayer.GetScore() + point;
-            PhotonNetwork.LocalPlayer.SetScore(score);
-        }
-
-        /// <summary>
-        /// 記録更新判定
-        /// </summary>
+        /// <param name="addScore">追加スコア</param>
         /// <param name="distance">飛距離</param>
-        /// <returns>記録更新したか</returns>
-        public bool UpdateRecord(float distance)
+        /// <returns></returns>
+        public bool UpdateScoreAndRecord(int addScore, float distance)
         {
             // 練習モード中は記録更新しない
             if (Practice) { return false; }
 
+            int score = PhotonNetwork.LocalPlayer.GetScore() + addScore;
             if (PhotonNetwork.LocalPlayer.GetRecord() < distance)
             {
-                // 記録更新した
-                PhotonNetwork.LocalPlayer.SetRecord(distance);
+                // スコアの追加と記録更新
+                PhotonNetwork.LocalPlayer.SetScoreAndRecord(score, distance);
                 return true;
             }
-            return false;
+            else
+            {
+                // スコアの追加のみ
+                PhotonNetwork.LocalPlayer.SetScore(score);
+                return false;
+            }
         }
 
         /// <summary>

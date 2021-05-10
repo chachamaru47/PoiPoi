@@ -34,10 +34,8 @@ namespace RPGM.Gameplay
                     // 自分の投げたアイテムのみ加点処理
                     if (item.ownerGameNo == model.gameManager.PlayerGameNo)
                     {
-                        // 加点
-                        model.gameManager.AddScore(score);
-                        // 記録更新判定
-                        if (model.gameManager.UpdateRecord(distance))
+                        // 加点と記録更新判定
+                        if (model.gameManager.UpdateScoreAndRecord(score, distance))
                         {
                             // 記録更新があった
                             MessageBar.Show($"New Record !!!!  Distance:{distance.ToString("0.00")}m");

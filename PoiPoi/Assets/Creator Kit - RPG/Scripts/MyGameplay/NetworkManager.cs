@@ -85,12 +85,21 @@ namespace RPGM.Gameplay
         // プレイヤーのレコードを取得する
         public static float GetRecord(this Player player)
         {
-            return (player.CustomProperties[RecordKey] is int record) ? record / 100.0f : -1.0f;
+            return (player.CustomProperties[RecordKey] is int record) ? record / 100.0f : -1.0f;    // 小数第二位までの固定小数点数としてint型で送受信
         }
         // プレイヤーのレコードを設定する
         public static void SetRecord(this Player player, float record)
         {
-            propsToSet[RecordKey] = (int)(record * 100.0f);
+            propsToSet[RecordKey] = (int)(record * 100.0f); // 小数第二位までの固定小数点数としてint型で送受信
+            player.SetCustomProperties(propsToSet);
+            propsToSet.Clear();
+        }
+
+        // プレイヤーのスコアとレコードをまとめて設定する
+        public static void SetScoreAndRecord(this Player player, int score, float record)
+        {
+            propsToSet[ScoreKey] = score;
+            propsToSet[RecordKey] = (int)(record * 100.0f); // 小数第二位までの固定小数点数としてint型で送受信
             player.SetCustomProperties(propsToSet);
             propsToSet.Clear();
         }
