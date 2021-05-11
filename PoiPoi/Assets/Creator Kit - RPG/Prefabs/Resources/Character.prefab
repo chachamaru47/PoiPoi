@@ -816,12 +816,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 15
   acceleration: 0.1
-  nextMoveCommand: {x: 0, y: 0, z: 0}
   animator: {fileID: 8171158353334016010}
-  flipX: 1
-  onFire: 0
-  releaseFire: 0
-  moveBrake: 0
   searchCollider: {fileID: 9080700192039350367}
   socket: {fileID: 8809922304415420891}
   powerGauge: {fileID: 7522701069104125974}
