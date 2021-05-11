@@ -9,10 +9,28 @@ namespace RPGM.UI
     /// </summary>
     public class InputController : MonoBehaviour
     {
+        /// <summary>
+        /// 操作スタイル
+        /// </summary>
+        public enum ControlStyle
+        {
+            /// <summary>
+            /// クラシック操作
+            /// </summary>
+            Classic,
+
+            /// <summary>
+            /// NEWコントロール
+            /// </summary>
+            NewControl,
+        }
+        public static ControlStyle controlStyle { get; set; } = ControlStyle.NewControl;
+
         public float stepSize = 0.1f;
         public float accelMax = 2f;
         public float deadZone = 0.2f;
         GameModel model = Schedule.GetModel<GameModel>();
+        float triggertAxis = 0.0f;
 
         public enum State
         {
@@ -40,6 +58,8 @@ namespace RPGM.UI
             if (model.gameManager.GamePhase != GameManager.GamePhaseType.InGame)
             {
                 model.player.nextMoveCommand = Vector3.zero;
+                model.player.nextAimCommand = Vector3.zero;
+                model.player.isAiming = false;
                 return;
             }
 
@@ -61,6 +81,8 @@ namespace RPGM.UI
         void DialogControl()
         {
             model.player.nextMoveCommand = Vector3.zero;
+            model.player.nextAimCommand = Vector3.zero;
+            model.player.isAiming = false;
 
             float horizontal = Input.GetAxis("Horizontal");
             if (horizontal < -deadZone)
@@ -82,17 +104,42 @@ namespace RPGM.UI
         /// </summary>
         void CharacterControl()
         {
-            model.player.nextMoveCommand = Vector3.up * Input.GetAxis("Vertical");
-            model.player.nextMoveCommand += Vector3.right * Input.GetAxis("Horizontal");
-            if (model.player.nextMoveCommand.magnitude > deadZone)
+            switch(controlStyle)
             {
-                float dash = Input.GetAxis("Dash_Stay");
-                float accel = 1.0f + accelMax * ((dash > 0.01f) ? dash : Input.GetButton("Dash") ? 1.0f : 0.0f);
-                model.player.nextMoveCommand *= accel * stepSize;
+                case ControlStyle.Classic:
+                    CharacterControlClassic();
+                    break;
+                case ControlStyle.NewControl:
+                default:
+                    CharacterControlNewControl();
+                    break;
+            }
+        }
+
+        void CharacterControlClassic()
+        {
+            model.player.nextAimCommand = Vector3.up * Input.GetAxis("Vertical");
+            model.player.nextAimCommand += Vector3.right * Input.GetAxis("Horizontal");
+            triggertAxis = Input.GetAxis("Trigger");
+            if ((triggertAxis < -0.01f) || Input.GetButton("Stay"))
+            {
+                model.player.isAiming = model.player.nextAimCommand.magnitude > deadZone;
+                model.player.nextMoveCommand = Vector3.zero;
             }
             else
             {
-                model.player.nextMoveCommand = Vector3.zero;
+                model.player.isAiming = false;
+                model.player.nextMoveCommand = Vector3.up * Input.GetAxis("Vertical");
+                model.player.nextMoveCommand += Vector3.right * Input.GetAxis("Horizontal");
+                if (model.player.nextMoveCommand.magnitude > deadZone)
+                {
+                    float accel = 1.0f + accelMax * ((triggertAxis > 0.01f) ? triggertAxis : Input.GetButton("Dash") ? 1.0f : 0.0f);
+                    model.player.nextMoveCommand *= accel * stepSize;
+                }
+                else
+                {
+                    model.player.nextMoveCommand = Vector3.zero;
+                }
             }
 
             if (Input.GetButtonDown("Fire1"))
@@ -103,7 +150,43 @@ namespace RPGM.UI
             {
                 model.player.releaseFire = true;
             }
-            model.player.moveBrake = (Input.GetAxis("Dash_Stay") < -0.01f) || Input.GetButton("Stay");
+        }
+
+        void CharacterControlNewControl()
+        {
+            model.player.nextAimCommand = Vector3.up * Input.GetAxis("AimVertical");
+            model.player.nextAimCommand += Vector3.right * Input.GetAxis("AimHorizontal");
+            model.player.nextMoveCommand = Vector3.up * Input.GetAxis("Vertical");
+            model.player.nextMoveCommand += Vector3.right * Input.GetAxis("Horizontal");
+
+            if (model.player.nextMoveCommand.magnitude > deadZone)
+            {
+                float accel = 1.0f + accelMax;
+                model.player.nextMoveCommand *= accel * stepSize;
+            }
+            else
+            {
+                model.player.nextMoveCommand = Vector3.zero;
+            }
+
+            model.player.isAiming = model.player.nextAimCommand.magnitude > deadZone;
+            if (!model.player.isAiming)
+            {
+                // エイム入力が無かったら移動入力方向に投げる
+                model.player.nextAimCommand = model.player.nextMoveCommand;
+            }
+
+            // 拾う投げるはRトリガー操作だが、とりあえずAボタンでも反応するようにしておく
+            float newTriggertAxis = Input.GetAxis("Trigger");
+            if (Input.GetButtonDown("Fire1") || Input.GetButtonDown("Dash") || (newTriggertAxis > 0.5f && triggertAxis <= 0.5f))
+            {
+                model.player.onFire = true;
+            }
+            if (Input.GetButtonUp("Fire1") || Input.GetButtonUp("Dash") || (newTriggertAxis <= 0.5f && triggertAxis > 0.5f))
+            {
+                model.player.releaseFire = true;
+            }
+            triggertAxis = newTriggertAxis;
         }
 
         /// <summary>

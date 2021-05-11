@@ -25,9 +25,10 @@ namespace RPGM.Gameplay
         public TMPro.TextMeshProUGUI nameText;
 
         public Vector3 nextMoveCommand { get; set; }
+        public Vector3 nextAimCommand { get; set; }
         public bool onFire { get; set; } = false;
         public bool releaseFire { get; set; } = false;
-        public bool moveBrake { get; set; } = false;
+        public bool isAiming { get; set; } = false;
 
         new Rigidbody2D rigidbody2D;
         SpriteRenderer spriteRenderer;
@@ -120,17 +121,18 @@ namespace RPGM.Gameplay
 
         void MoveState()
         {
+            Vector3 dirCommand = (isAiming) ? nextAimCommand : nextMoveCommand;
             velocity = Mathf.Clamp01(velocity + Time.deltaTime * acceleration);
-            UpdateAnimator(nextMoveCommand, moveBrake);
-            var move_command = (moveBrake) ? Vector3.zero : nextMoveCommand;
+            bool stay = nextMoveCommand.magnitude < 0.2f;
+            UpdateAnimator(dirCommand, stay);
             float apply_speed = speed;
             if (useItem != null)
             {
                 // アイテムの重さを見て減速
                 apply_speed *= Mathf.Lerp(1.0f, 0.1f, useItem.data.mass / 5.0f);
             }
-            rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity, move_command * apply_speed, ref currentVelocity, acceleration, speed);
-            spriteRenderer.flipX = (moveBrake ? nextMoveCommand.x : rigidbody2D.velocity.x) >= 0 ? true : false;
+            rigidbody2D.velocity = Vector2.SmoothDamp(rigidbody2D.velocity, nextMoveCommand * apply_speed, ref currentVelocity, acceleration, speed);
+            spriteRenderer.flipX = (isAiming ? dirCommand.x : rigidbody2D.velocity.x) >= 0 ? true : false;
         }
 
         void UpdateAnimator(Vector3 direction, bool stay)
@@ -182,22 +184,19 @@ namespace RPGM.Gameplay
             else
             {
                 // パワーゲージの角度を移動入力の角度に合わせる
-                float rad = Mathf.Atan2(nextMoveCommand.y, nextMoveCommand.x);
+                float rad = Mathf.Atan2(nextAimCommand.y, nextAimCommand.x);
                 powerGauge.transform.eulerAngles = new Vector3(0.0f, 0.0f, rad * Mathf.Rad2Deg);
 
-                // ブレーキ中に移動入力があったら
-                if (moveBrake)
+                // エイム入力があったら
+                if (isAiming)
                 {
-                    if (nextMoveCommand.magnitude != 0.0f)
-                    {
-                        // パワーゲージを表示
-                        powerGauge.Show(0.0f);
+                    // パワーゲージを表示
+                    powerGauge.Show(0.0f);
 
-                        // カメラのフォーカス対象がデフォルト状態なら入力方向にカメラを振る
-                        if (model.cameraController.IsDefaultFocus())
-                        {
-                            model.cameraController.positionOffset = nextMoveCommand.normalized * 5.0f;
-                        }
+                    // カメラのフォーカス対象がデフォルト状態なら入力方向にカメラを振る
+                    if (model.cameraController.IsDefaultFocus())
+                    {
+                        model.cameraController.positionOffset = nextAimCommand.normalized * 5.0f;
                     }
                 }
 
@@ -207,7 +206,7 @@ namespace RPGM.Gameplay
                     chargeTime += Time.deltaTime;
                     if (chargeTime < 1.1f)
                     {
-                        if (nextMoveCommand.magnitude != 0.0f)
+                        if (nextAimCommand.magnitude != 0.0f)
                         {
                             powerGauge.Show((chargeTime > 1.0f) ? 1.0f : chargeTime / 1.0f);
                         }
@@ -215,7 +214,7 @@ namespace RPGM.Gameplay
                     else
                     {
                         bCharge = false;
-                        if (nextMoveCommand.magnitude != 0.0f)
+                        if (nextAimCommand.magnitude != 0.0f)
                         {
                             powerGauge.Show(0.0f);
                         }
@@ -240,7 +239,7 @@ namespace RPGM.Gameplay
                     // チャージ中ならアイテム投射
                     if (bCharge)
                     {
-                        Vector2 force = nextMoveCommand.normalized * chargeTime * 20.0f;
+                        Vector2 force = nextAimCommand.normalized * chargeTime * 20.0f;
                         ThrowItem(force);
                     }
                 }

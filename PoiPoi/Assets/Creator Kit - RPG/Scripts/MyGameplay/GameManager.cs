@@ -311,12 +311,25 @@ namespace RPGM.Gameplay
                 }
 
                 // 操作説明表示
-                UI.MessageBoard.Show(
-                    "Move : R Stick\n" +
-                    "Pick or Charge : A\n" +
-                    "Dash : R Trigger\n" +
-                    "Stay : L Trigger\n",
-                    PhotonNetwork.IsMasterClient);
+                switch (UI.InputController.controlStyle)
+                {
+                    case UI.InputController.ControlStyle.Classic:
+                        UI.MessageBoard.Show(
+                            "Move : L Stick\n" +
+                            "Pick or Charge : A\n" +
+                            "Dash : R Trigger\n" +
+                            "Stay : L Trigger\n",
+                            PhotonNetwork.IsMasterClient);
+                        break;
+                    case UI.InputController.ControlStyle.NewControl:
+                    default:
+                        UI.MessageBoard.Show(
+                            "Move : L Stick\n" +
+                            "Aim : R Stick\n" +
+                            "Pick or Charge: R Trigger\n",
+                            PhotonNetwork.IsMasterClient);
+                        break;
+                }
 
                 // マスターの人がボタン押下したらゲーム開始
                 if (PhotonNetwork.IsMasterClient)
