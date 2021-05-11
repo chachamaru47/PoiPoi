@@ -12,6 +12,8 @@ namespace RPGM.UI
     {
         public TMPro.TextMeshProUGUI textMeshProUGUI_Message;
         public TMPro.TextMeshProUGUI textMeshProUGUI_Next;
+        public UnityEngine.UI.Image arrowLeft;
+        public UnityEngine.UI.Image arrowRight;
 
         static MessageBoard instance;
 
@@ -25,11 +27,13 @@ namespace RPGM.UI
         /// 表示する
         /// </summary>
         /// <param name="text"></param>
-        public static void Show(string text, bool next = false)
+        public static void Show(string text, bool next = false, bool arrowL = false, bool arrowR = false)
         {
             instance.textMeshProUGUI_Message.text = text;
             instance.textMeshProUGUI_Next.gameObject.SetActive(next);
             instance.gameObject.SetActive(true);
+            instance.arrowLeft.gameObject.SetActive(arrowL);
+            instance.arrowRight.gameObject.SetActive(arrowR);
         }
 
         /// <summary>

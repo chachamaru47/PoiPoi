@@ -285,6 +285,9 @@ namespace RPGM.Gameplay
         /// <returns>IEnumerator</returns>
         private IEnumerator LobbyCoroutine(UnityEngine.Events.UnityAction<bool> endCallback)
         {
+            float horizontal = 0.0f;
+            int controlStyleNum = System.Enum.GetValues(typeof(UI.InputController.ControlStyle)).Length;
+
             if (!PhotonNetwork.OfflineMode)
             {
                 UI.Lobby.Show();
@@ -311,15 +314,17 @@ namespace RPGM.Gameplay
                 }
 
                 // 操作説明表示
-                switch (UI.InputController.controlStyle)
+                switch (model.input.controlStyle)
                 {
                     case UI.InputController.ControlStyle.Classic:
                         UI.MessageBoard.Show(
-                            "Move : L Stick\n" +
+                            "Move or Aim : L Stick\n" +
                             "Pick or Charge : A\n" +
                             "Dash : R Trigger\n" +
                             "Stay : L Trigger\n",
-                            PhotonNetwork.IsMasterClient);
+                            PhotonNetwork.IsMasterClient,
+                            controlStyleNum >= 2,
+                            controlStyleNum >= 2);
                         break;
                     case UI.InputController.ControlStyle.NewControl:
                     default:
@@ -327,8 +332,27 @@ namespace RPGM.Gameplay
                             "Move : L Stick\n" +
                             "Aim : R Stick\n" +
                             "Pick or Charge: R Trigger\n",
-                            PhotonNetwork.IsMasterClient);
+                            PhotonNetwork.IsMasterClient,
+                            controlStyleNum >= 2,
+                            controlStyleNum >= 2);
                         break;
+                }
+
+                // 操作切り替え
+                if (controlStyleNum >= 2)
+                {
+                    float newHorizontal = Input.GetAxis("Horizontal");
+                    if (newHorizontal < -0.5f && horizontal >= -0.5f)
+                    {
+                        model.input.controlStyle = (UI.InputController.ControlStyle)Mathf.Repeat((float)model.input.controlStyle - 1, controlStyleNum);
+                        UI.UserInterfaceAudio.OnPick();
+                    }
+                    if (newHorizontal > 0.5f && horizontal <= 0.5f)
+                    {
+                        model.input.controlStyle = (UI.InputController.ControlStyle)Mathf.Repeat((float)model.input.controlStyle + 1, controlStyleNum);
+                        UI.UserInterfaceAudio.OnPick();
+                    }
+                    horizontal = newHorizontal;
                 }
 
                 // マスターの人がボタン押下したらゲーム開始
