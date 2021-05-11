@@ -257,7 +257,7 @@ namespace RPGM.Gameplay
             yield return new WaitForSeconds(1.5f);
 
             model.cameraController.SetDefaultFocus(model.player.transform);
-            model.cameraController.isInGameCamera = true;
+            model.cameraController.ChangeInGameCamera();
             UI.MessageBoard.Hide();
             for (int i = 0; i < model.scores.Length; i++)
             {
@@ -362,7 +362,8 @@ namespace RPGM.Gameplay
             }
             UI.Timer.Hide();
             UI.MessageBoard.Show("Finish !!!!");
-            model.cameraController.isInGameCamera = false;
+            model.cameraController.SetOutGameCameraFocus(model.player.transform);
+            model.cameraController.ChangeOutGameCamera();
             yield return new WaitForSeconds(3.0f);
 
             // リザルト表示

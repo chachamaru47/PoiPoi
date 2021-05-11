@@ -14,14 +14,10 @@ namespace RPGM.Gameplay
     {
         public Transform defaultFocus;
         public float smoothTime = 2;
-        public Cinemachine.CinemachineVirtualCamera virtualCamera;
+        public Cinemachine.CinemachineVirtualCamera virtualCameraOutGame;
+        public Cinemachine.CinemachineVirtualCamera virtualCameraInGmae;
         public Cinemachine.CinemachineTargetGroup targetGroup;
 
-        public bool isInGameCamera
-        {
-            get => virtualCamera.gameObject.activeSelf;
-            set => virtualCamera.gameObject.SetActive(value);
-        }
         public Vector3 positionOffset { get; set; }
 
         Transform focus;
@@ -73,6 +69,33 @@ namespace RPGM.Gameplay
         }
 
         /// <summary>
+        /// アウトゲームカメラに切り替え
+        /// </summary>
+        public void ChangeOutGameCamera()
+        {
+            virtualCameraOutGame.Priority = 10;
+            virtualCameraInGmae.Priority = 0;
+        }
+
+        /// <summary>
+        /// インゲームカメラに切り替え
+        /// </summary>
+        public void ChangeInGameCamera()
+        {
+            virtualCameraInGmae.Priority = 10;
+            virtualCameraOutGame.Priority = 0;
+        }
+
+        /// <summary>
+        /// アウトゲームカメラのフォーカス対象を設定
+        /// </summary>
+        /// <param name="target"></param>
+        public void SetOutGameCameraFocus(Transform target)
+        {
+            virtualCameraOutGame.Follow = target;
+        }
+
+        /// <summary>
         /// デフォルトのフォーカス対象を設定する
         /// </summary>
         /// <param name="target">デフォルトのフォーカス対象</param>
@@ -80,7 +103,7 @@ namespace RPGM.Gameplay
         {
             if (targetGroup.FindMember(target) < 0)
             {
-                targetGroup.AddMember(target, 1.0f, 0.5f);
+                targetGroup.AddMember(target, 1.0f, 1.0f);
             }
             defaultFocus = target;
             ResetFocus();
