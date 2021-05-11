@@ -24,7 +24,7 @@ namespace RPGM.UI
             /// </summary>
             NewControl,
         }
-        public static ControlStyle controlStyle { get; set; } = ControlStyle.NewControl;
+        public ControlStyle controlStyle { get; set; } = ControlStyle.NewControl;
 
         public float stepSize = 0.1f;
         public float accelMax = 2f;

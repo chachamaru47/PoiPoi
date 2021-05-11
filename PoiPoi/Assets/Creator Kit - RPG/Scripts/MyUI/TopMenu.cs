@@ -39,7 +39,7 @@ namespace RPGM.UI
             audioSource = GetComponent<AudioSource>();
             SetCursor(Gameplay.NetworkManager.IsOnlineMode ? GameMode.OnlineMode : GameMode.OfflineMode);
 
-            FadeScreen.FadeIn(1.0f, Color.black);
+            StartCoroutine(ModeSelectCoroutine());
         }
 
         // Update is called once per frame
@@ -47,28 +47,6 @@ namespace RPGM.UI
         {
             // アプリ終了の入力監視
             InputController.MonitoringQuitInput();
-
-            float vertical = Input.GetAxis("Vertical");
-            if (vertical > deadZone)
-            {
-                if (cursorPos != GameMode.OfflineMode)
-                {
-                    audioSource.PlayOneShot(onSelect);
-                    SetCursor(GameMode.OfflineMode);
-                }
-            }
-            if (vertical < -deadZone)
-            {
-                if (cursorPos != GameMode.OnlineMode)
-                {
-                    audioSource.PlayOneShot(onSelect);
-                    SetCursor(GameMode.OnlineMode);
-                }
-            }
-            if (Input.GetButtonDown("Submit"))
-            {
-                StartCoroutine(StartGameCoroutine());
-            }
         }
 
         /// <summary>
@@ -82,6 +60,40 @@ namespace RPGM.UI
             {
                 CursorList[i].SetActive(i == (int)cursorPos);
             }
+        }
+
+        /// <summary>
+        /// モード選択コルーチン
+        /// </summary>
+        /// <returns>IEnumerator</returns>
+        private IEnumerator ModeSelectCoroutine()
+        {
+            FadeScreen.FadeIn(1.0f, Color.black);
+
+            while(!Input.GetButtonDown("Submit"))
+            {
+                float vertical = Input.GetAxis("Vertical");
+                if (vertical > deadZone)
+                {
+                    if (cursorPos != GameMode.OfflineMode)
+                    {
+                        audioSource.PlayOneShot(onSelect);
+                        SetCursor(GameMode.OfflineMode);
+                    }
+                }
+                if (vertical < -deadZone)
+                {
+                    if (cursorPos != GameMode.OnlineMode)
+                    {
+                        audioSource.PlayOneShot(onSelect);
+                        SetCursor(GameMode.OnlineMode);
+                    }
+                }
+                yield return null;
+            }
+
+            StartCoroutine(StartGameCoroutine());
+            yield break;
         }
 
         /// <summary>
