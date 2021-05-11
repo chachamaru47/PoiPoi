@@ -15,19 +15,19 @@ namespace RPGM.Gameplay
     {
         public float speed = 1;
         public float acceleration = 2;
-        public Vector3 nextMoveCommand;
         public Animator animator;
-        public bool flipX = false;
-        public bool onFire = false;
-        public bool releaseFire = false;
-        public bool moveBrake = false;
-        public Collider2D searchCollider;
+        //public bool flipX = false;
 
+        public Collider2D searchCollider;
         public GameObject socket;
         public UI.PowerGauge powerGauge;
-
         public GameObject namePlate;
         public TMPro.TextMeshProUGUI nameText;
+
+        public Vector3 nextMoveCommand { get; set; }
+        public bool onFire { get; set; } = false;
+        public bool releaseFire { get; set; } = false;
+        public bool moveBrake { get; set; } = false;
 
         new Rigidbody2D rigidbody2D;
         SpriteRenderer spriteRenderer;

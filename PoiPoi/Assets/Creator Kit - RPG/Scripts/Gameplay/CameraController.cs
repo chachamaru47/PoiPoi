@@ -14,9 +14,15 @@ namespace RPGM.Gameplay
     {
         public Transform defaultFocus;
         public float smoothTime = 2;
+        public Cinemachine.CinemachineVirtualCamera virtualCamera;
+        public Cinemachine.CinemachineTargetGroup targetGroup;
 
-        [System.NonSerialized]
-        public Vector3 positionOffset;
+        public bool isInGameCamera
+        {
+            get => virtualCamera.gameObject.activeSelf;
+            set => virtualCamera.gameObject.SetActive(value);
+        }
+        public Vector3 positionOffset { get; set; }
 
         Transform focus;
         Vector3 offset;
@@ -72,6 +78,10 @@ namespace RPGM.Gameplay
         /// <param name="target">デフォルトのフォーカス対象</param>
         public void SetDefaultFocus(Transform target)
         {
+            if (targetGroup.FindMember(target) < 0)
+            {
+                targetGroup.AddMember(target, 1.0f, 0.5f);
+            }
             defaultFocus = target;
             ResetFocus();
         }
