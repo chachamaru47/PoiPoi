@@ -62,6 +62,9 @@ namespace RPGM.UI
                 model.player.nextMoveCommand = Vector3.zero;
                 model.player.nextAimCommand = Vector3.zero;
                 model.player.isAiming = false;
+                reserveAimTime = 0.0f;
+                reserveAimCommand = Vector3.zero;
+                triggertAxis = 0.0f;
                 return;
             }
 
@@ -85,6 +88,9 @@ namespace RPGM.UI
             model.player.nextMoveCommand = Vector3.zero;
             model.player.nextAimCommand = Vector3.zero;
             model.player.isAiming = false;
+            reserveAimTime = 0.0f;
+            reserveAimCommand = Vector3.zero;
+            triggertAxis = 0.0f;
 
             float horizontal = Input.GetAxis("Horizontal");
             if (horizontal < -deadZone)
