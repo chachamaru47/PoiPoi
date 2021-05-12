@@ -10,13 +10,10 @@ namespace RPGM.UI
     public class Score : MonoBehaviour
     {
         public LobbyPlayer player;
-        public int playerGameNo;
         public TMPro.TextMeshProUGUI textMeshProUGUI;
 
         void Awake()
         {
-            player.SetPlayerGameNo(playerGameNo, Gameplay.NetworkManager.IsOnlineMode);
-            player.Show(false);
             SetScore(0);
             Hide();
         }
@@ -24,8 +21,12 @@ namespace RPGM.UI
         /// <summary>
         /// 表示する
         /// </summary>
-        public void Show()
+        /// <param name="playerGameNo">プレイヤーゲーム番号</param>
+        /// <param name="showNo">プレイヤーゲーム番号を表示するか</param>
+        public void Show(int playerGameNo, bool showNo)
         {
+            player.SetPlayerGameNo(playerGameNo, showNo);
+            player.Show(false);
             gameObject.SetActive(true);
         }
 

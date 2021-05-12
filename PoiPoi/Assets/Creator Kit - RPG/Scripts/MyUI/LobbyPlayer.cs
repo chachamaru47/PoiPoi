@@ -17,7 +17,7 @@ namespace RPGM.UI
         /// プレイヤーのゲーム番号を設定
         /// </summary>
         /// <param name="playerGameNo">プレイヤーゲーム番号</param>
-        /// <param name="showNo">ゲーム番号を表示するか</param>
+        /// <param name="showNo">プレイヤーゲーム番号を表示するか</param>
         public void SetPlayerGameNo(int playerGameNo, bool showNo)
         {
             Color textColor = Gameplay.CharacterController2D.GetPlayerTextColor(playerGameNo);

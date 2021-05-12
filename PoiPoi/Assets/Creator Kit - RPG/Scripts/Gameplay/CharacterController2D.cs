@@ -59,7 +59,7 @@ namespace RPGM.Gameplay
         public static Color GetPlayerTextColor(int playerGameNo)
         {
             Color color;
-            switch (playerGameNo % 4)
+            switch (playerGameNo % NetworkManager.RoomMaxPlayers)
             {
                 default:
                 case 0:
@@ -74,6 +74,9 @@ namespace RPGM.Gameplay
                 case 3:
                     color = Color.cyan;
                     break;
+                case 4:
+                    color = Color.green;
+                    break;
             }
             return color;
         }
@@ -86,7 +89,7 @@ namespace RPGM.Gameplay
         public static Color GetPlayerCharacterColor(int playerGameNo)
         {
             Color color;
-            switch (playerGameNo % 4)
+            switch (playerGameNo % NetworkManager.RoomMaxPlayers)
             {
                 default:
                 case 0:
@@ -99,7 +102,10 @@ namespace RPGM.Gameplay
                     color = new Color(1.0f, 1.0f, 0.0f);
                     break;
                 case 3:
-                    color = new Color(0.5f, 0.1f, 1.0f);
+                    color = new Color(0.3f, 0.8f, 1.0f);
+                    break;
+                case 4:
+                    color = new Color(0.5f, 1.0f, 0.5f);
                     break;
             }
             return color;
