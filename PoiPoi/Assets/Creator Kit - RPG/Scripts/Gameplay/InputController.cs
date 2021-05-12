@@ -31,6 +31,8 @@ namespace RPGM.UI
         public float deadZone = 0.2f;
         GameModel model = Schedule.GetModel<GameModel>();
         float triggertAxis = 0.0f;
+        Vector3 reserveAimCommand = Vector3.zero;
+        float reserveAimTime = 0.0f;
 
         public enum State
         {
@@ -116,6 +118,9 @@ namespace RPGM.UI
             }
         }
 
+        /// <summary>
+        /// キャラクター操作(クラシック操作)
+        /// </summary>
         void CharacterControlClassic()
         {
             model.player.nextAimCommand = Vector3.up * Input.GetAxis("Vertical");
@@ -152,6 +157,9 @@ namespace RPGM.UI
             }
         }
 
+        /// <summary>
+        /// キャラクター操作(NEWコントロール)
+        /// </summary>
         void CharacterControlNewControl()
         {
             model.player.nextAimCommand = Vector3.up * Input.GetAxis("AimVertical");
@@ -170,10 +178,25 @@ namespace RPGM.UI
             }
 
             model.player.isAiming = model.player.nextAimCommand.magnitude > deadZone;
-            if (!model.player.isAiming)
+            if (model.player.isAiming)
             {
-                // エイム入力が無かったら移動入力方向に投げる
-                model.player.nextAimCommand = model.player.nextMoveCommand;
+                // 投げる瞬間にエイム入力を放してもエイムしていた方向に投げる為に保存
+                reserveAimTime = 0.2f;
+                reserveAimCommand = model.player.nextAimCommand;
+            }
+            else
+            {
+                if (reserveAimTime > 0.0f)
+                {
+                    // 投げる瞬間にエイム入力を放してもエイムしていた方向に投げる
+                    reserveAimTime -= Time.deltaTime;
+                    model.player.nextAimCommand = reserveAimCommand;
+                }
+                else
+                {
+                    // エイム入力が無くなったら移動入力方向に投げる
+                    model.player.nextAimCommand = model.player.nextMoveCommand;
+                }
             }
 
             // 拾う投げるはRトリガー操作だが、とりあえずAボタンでも反応するようにしておく
