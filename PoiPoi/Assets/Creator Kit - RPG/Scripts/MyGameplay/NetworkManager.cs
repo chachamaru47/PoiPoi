@@ -9,7 +9,7 @@ namespace RPGM.Gameplay
     public class NetworkManager : MonoBehaviourPunCallbacks
     {
         public static bool IsOnlineMode { get; set; } = false;
-        public static byte RoomMaxPlayers { get; } = 4;
+        public static byte RoomMaxPlayers { get; } = 5;
 
         private void Start()
         {

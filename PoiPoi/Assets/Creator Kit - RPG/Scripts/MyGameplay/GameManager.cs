@@ -263,7 +263,7 @@ namespace RPGM.Gameplay
             {
                 if(System.Array.Exists(PhotonNetwork.PlayerList, p=>p.GetGameNo()==i))
                 {
-                    model.scores[i].Show();
+                    model.scores[i].Show(i, !PhotonNetwork.OfflineMode);
                 }
                 else
                 {
