@@ -15,16 +15,31 @@ namespace RPGM.UI
         public enum ControlStyle
         {
             /// <summary>
-            /// クラシック操作
+            /// チャージエイム(エイムリバース)
             /// </summary>
-            Classic,
+            ChargeAim_Reverse,
+
+            /// <summary>
+            /// チャージエイム
+            /// </summary>
+            ChargeAim,
+
+            /// <summary>
+            /// NEWコントロール(エイムリバース)
+            /// </summary>
+            NewControl_Reverse,
 
             /// <summary>
             /// NEWコントロール
             /// </summary>
             NewControl,
+
+            /// <summary>
+            /// クラシック操作
+            /// </summary>
+            Classic,
         }
-        public ControlStyle controlStyle { get; set; } = ControlStyle.NewControl;
+        public ControlStyle controlStyle { get; set; } = ControlStyle.ChargeAim_Reverse;
 
         public float stepSize = 0.1f;
         public float accelMax = 2f;
@@ -112,14 +127,33 @@ namespace RPGM.UI
         /// </summary>
         void CharacterControl()
         {
-            switch(controlStyle)
+            switch (controlStyle)
             {
-                case ControlStyle.Classic:
-                    CharacterControlClassic();
+                default:
+                case ControlStyle.ChargeAim_Reverse:
+                    model.player.isChargeLoop = true;
+                    model.player.chargeSpeed = 1.0f;
+                    CharacterControlChargeAim(true);
+                    break;
+                case ControlStyle.ChargeAim:
+                    model.player.isChargeLoop = true;
+                    model.player.chargeSpeed = 1.0f;
+                    CharacterControlChargeAim(false);
+                    break;
+                case ControlStyle.NewControl_Reverse:
+                    model.player.isChargeLoop = false;
+                    model.player.chargeSpeed = 1.0f;
+                    CharacterControlNewControl(true);
                     break;
                 case ControlStyle.NewControl:
-                default:
-                    CharacterControlNewControl();
+                    model.player.isChargeLoop = false;
+                    model.player.chargeSpeed = 1.0f;
+                    CharacterControlNewControl(false);
+                    break;
+                case ControlStyle.Classic:
+                    model.player.isChargeLoop = false;
+                    model.player.chargeSpeed = 1.0f;
+                    CharacterControlClassic();
                     break;
             }
         }
@@ -153,23 +187,39 @@ namespace RPGM.UI
                 }
             }
 
+            model.player.onPick = false;
+            model.player.onCharge = false;
+            model.player.onFire = false;
+            model.player.offCharge = false;
             if (Input.GetButtonDown("Fire1"))
             {
-                model.player.onFire = true;
+                model.player.onPick = true;
+                model.player.onCharge = true;
             }
             if (Input.GetButtonUp("Fire1"))
             {
-                model.player.releaseFire = true;
+                model.player.onFire = true;
+                model.player.offCharge = false;
             }
         }
 
         /// <summary>
         /// キャラクター操作(NEWコントロール)
         /// </summary>
-        void CharacterControlNewControl()
+        /// <param name="reverse">エイム軸反転</param>
+        void CharacterControlNewControl(bool reverse)
         {
+            model.player.onPick = false;
+            model.player.onCharge = false;
+            model.player.onFire = false;
+            model.player.offCharge = false;
+
             model.player.nextAimCommand = Vector3.up * Input.GetAxis("AimVertical");
             model.player.nextAimCommand += Vector3.right * Input.GetAxis("AimHorizontal");
+            if (reverse)
+            {
+                model.player.nextAimCommand *= -1;
+            }
             model.player.nextMoveCommand = Vector3.up * Input.GetAxis("Vertical");
             model.player.nextMoveCommand += Vector3.right * Input.GetAxis("Horizontal");
 
@@ -209,13 +259,93 @@ namespace RPGM.UI
             float newTriggertAxis = Input.GetAxis("Trigger");
             if (Input.GetButtonDown("Fire1") || Input.GetButtonDown("Dash") || (newTriggertAxis > 0.5f && triggertAxis <= 0.5f))
             {
-                model.player.onFire = true;
+                model.player.onPick = true;
+                model.player.onCharge = true;
             }
             if (Input.GetButtonUp("Fire1") || Input.GetButtonUp("Dash") || (newTriggertAxis <= 0.5f && triggertAxis > 0.5f))
             {
-                model.player.releaseFire = true;
+                model.player.onFire = true;
+                model.player.offCharge = true;
             }
             triggertAxis = newTriggertAxis;
+        }
+
+        /// <summary>
+        /// キャラクター操作(チャージエイム)
+        /// </summary>
+        /// <param name="reverse">エイム軸反転</param>
+        void CharacterControlChargeAim(bool reverse)
+        {
+            model.player.onPick = false;
+            model.player.onCharge = false;
+            model.player.onFire = false;
+
+            Vector3 oldAimCommand = model.player.nextAimCommand;
+            Vector3 newAimCommand = Vector3.up * Input.GetAxis("AimVertical");
+            if (reverse)
+            {
+                newAimCommand *= -1;
+            }
+            model.player.nextAimCommand = newAimCommand;
+
+            model.player.isAiming = newAimCommand.magnitude > deadZone;
+            model.player.onCharge = newAimCommand.magnitude > deadZone;
+            model.player.offCharge = !model.player.onCharge;
+            if (model.player.isAiming)
+            {
+                // 投げる瞬間にエイム入力を放してもエイムしていた方向に投げる為に保存
+                reserveAimTime = 0.2f;
+                reserveAimCommand = newAimCommand;
+            }
+            else
+            {
+                if (reserveAimTime > 0.0f)
+                {
+                    // 投げる瞬間にエイム入力を放してもエイムしていた方向に投げる
+                    reserveAimTime -= Time.deltaTime;
+                    model.player.nextAimCommand = reserveAimCommand;
+                }
+                else
+                {
+                    // エイム入力が無くなったら移動入力方向に投げる
+                    reserveAimCommand = Vector3.zero;
+                    model.player.nextAimCommand = model.player.nextMoveCommand;
+                }
+            }
+            if (newAimCommand.sqrMagnitude < oldAimCommand.sqrMagnitude)
+            {
+                if (Vector3.Distance(newAimCommand, oldAimCommand) > 0.5f)
+                {
+                    // スティックを一気に放したら投げる
+                    model.player.nextAimCommand = oldAimCommand;
+                    model.player.onFire = true;
+                }
+            }
+
+            model.player.nextMoveCommand = Vector3.up * Input.GetAxis("Vertical");
+            model.player.nextMoveCommand += Vector3.right * Input.GetAxis("Horizontal");
+
+            if (model.player.nextMoveCommand.magnitude > deadZone)
+            {
+                float accel = 1.0f + accelMax;
+                model.player.nextMoveCommand *= accel * stepSize;
+            }
+            else
+            {
+                model.player.nextMoveCommand = Vector3.zero;
+            }
+
+            float newTriggertAxis = Input.GetAxis("Trigger");
+            if (Input.GetButtonDown("Fire1") || Input.GetButtonDown("Dash") || (newTriggertAxis > 0.5f && triggertAxis <= 0.5f))
+            {
+                model.player.onPick = true;
+                model.player.onFire = true;
+            }
+            triggertAxis = newTriggertAxis;
+            if (Input.GetKeyDown("joystick button 9"))
+            {
+                model.player.onPick = true;
+            }
         }
 
         /// <summary>

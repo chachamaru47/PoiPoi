@@ -26,9 +26,13 @@ namespace RPGM.Gameplay
 
         public Vector3 nextMoveCommand { get; set; }
         public Vector3 nextAimCommand { get; set; }
+        public bool onPick { get; set; } = false;
+        public bool onCharge { get; set; } = false;
+        public bool offCharge { get; set; } = false;
         public bool onFire { get; set; } = false;
-        public bool releaseFire { get; set; } = false;
         public bool isAiming { get; set; } = false;
+        public bool isChargeLoop { get; set; } = false;
+        public float chargeSpeed { get; set; } = 1.0f;
 
         new Rigidbody2D rigidbody2D;
         SpriteRenderer spriteRenderer;
@@ -179,11 +183,11 @@ namespace RPGM.Gameplay
                 // アイテムを持ってない時
 
                 bCharge = false;
+                chargeTime = 0.0f;
 
                 // アイテムサーチ
-                if (onFire)
+                if (onPick)
                 {
-                    onFire = false;
                     StartCoroutine(SearchCoroutine());
                 }
             }
@@ -207,19 +211,24 @@ namespace RPGM.Gameplay
                 }
 
                 // チャージ中
+                float chargePower = 0.0f;
                 if (bCharge)
                 {
-                    chargeTime += Time.deltaTime;
+                    chargeTime += chargeSpeed * Time.deltaTime;
+                    if (isChargeLoop)
+                    {
+                        chargeTime = Mathf.Repeat(chargeTime, 1.1f);
+                    }
                     if (chargeTime < 1.1f)
                     {
                         if (nextAimCommand.magnitude != 0.0f)
                         {
+                            chargePower = chargeTime;
                             powerGauge.Show((chargeTime > 1.0f) ? 1.0f : chargeTime / 1.0f);
                         }
                     }
                     else
                     {
-                        bCharge = false;
                         if (nextAimCommand.magnitude != 0.0f)
                         {
                             powerGauge.Show(0.0f);
@@ -227,27 +236,28 @@ namespace RPGM.Gameplay
                     }
                 }
 
-                // 攻撃ボタン押下
-                if (onFire)
+                if (onCharge)
                 {
-                    onFire = false;
-
                     // チャージ開始
                     bCharge = true;
-                    chargeTime = 0.0f;
                 }
 
                 // 攻撃ボタン離す
-                if (releaseFire)
+                if (onFire)
                 {
-                    releaseFire = false;
-
                     // チャージ中ならアイテム投射
                     if (bCharge)
                     {
-                        Vector2 force = nextAimCommand.normalized * chargeTime * 20.0f;
+                        // アイテム投射
+                        Vector2 force = nextAimCommand.normalized * chargePower * 20.0f;
                         ThrowItem(force);
                     }
+                }
+
+                if (offCharge)
+                {
+                    bCharge = false;
+                    chargeTime = 0.0f;
                 }
             }
         }
@@ -333,7 +343,6 @@ namespace RPGM.Gameplay
         {
             if (useItem != null)
             {
-                bCharge = false;
                 photonView.RPC(nameof(RpcThrowItem), RpcTarget.AllViaServer, useItem.id, useItem.transform.position, force.x, force.y, socket.transform.localPosition.y);
                 useItem = null;
             }

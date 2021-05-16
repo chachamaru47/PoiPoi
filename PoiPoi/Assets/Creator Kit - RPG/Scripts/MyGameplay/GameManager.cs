@@ -111,7 +111,7 @@ namespace RPGM.Gameplay
             }
 
             // 全プレイヤーのスコア表示を更新
-            foreach(var player in PhotonNetwork.PlayerList)
+            foreach (var player in PhotonNetwork.PlayerList)
             {
                 if (player.GetReady())
                 {
@@ -237,7 +237,7 @@ namespace RPGM.Gameplay
                 lobbyWait = false;
             }));
             yield return new WaitWhile(() => lobbyWait);
-            if(!lobbyResult)
+            if (!lobbyResult)
             {
                 // トップメニューに戻る
                 StartCoroutine(ReturnTopMenu());
@@ -261,7 +261,7 @@ namespace RPGM.Gameplay
             UI.MessageBoard.Hide();
             for (int i = 0; i < model.scores.Length; i++)
             {
-                if(System.Array.Exists(PhotonNetwork.PlayerList, p=>p.GetGameNo()==i))
+                if (System.Array.Exists(PhotonNetwork.PlayerList, p => p.GetGameNo() == i))
                 {
                     model.scores[i].Show(i, !PhotonNetwork.OfflineMode);
                 }
@@ -316,22 +316,51 @@ namespace RPGM.Gameplay
                 // 操作説明表示
                 switch (model.input.controlStyle)
                 {
-                    case UI.InputController.ControlStyle.Classic:
+                    default:
+                    case UI.InputController.ControlStyle.ChargeAim_Reverse:
                         UI.MessageBoard.Show(
-                            "Move or Aim : L Stick\n" +
-                            "Pick or Charge : A\n" +
-                            "Dash : R Trigger\n" +
-                            "Stay : L Trigger\n",
+                            "Move : L Stick\n" +
+                            "Pick: R Trigger\n" +
+                            "Charge and Aim: R Stick\n" + 
+                            "(Aim Reverse)",
+                            PhotonNetwork.IsMasterClient,
+                            controlStyleNum >= 2,
+                            controlStyleNum >= 2);
+                        break;
+                    case UI.InputController.ControlStyle.ChargeAim:
+                        UI.MessageBoard.Show(
+                            "Move : L Stick\n" +
+                            "Pick: R Trigger\n" +
+                            "Charge and Aim: R Stick",
+                            PhotonNetwork.IsMasterClient,
+                            controlStyleNum >= 2,
+                            controlStyleNum >= 2);
+                        break;
+                    case UI.InputController.ControlStyle.NewControl_Reverse:
+                        UI.MessageBoard.Show(
+                            "Move : L Stick\n" +
+                            "Aim : R Stick\n" +
+                            "Pick or Charge: R Trigger\n" +
+                            "(Aim Reverse)",
                             PhotonNetwork.IsMasterClient,
                             controlStyleNum >= 2,
                             controlStyleNum >= 2);
                         break;
                     case UI.InputController.ControlStyle.NewControl:
-                    default:
                         UI.MessageBoard.Show(
                             "Move : L Stick\n" +
                             "Aim : R Stick\n" +
-                            "Pick or Charge: R Trigger\n",
+                            "Pick or Charge: R Trigger",
+                            PhotonNetwork.IsMasterClient,
+                            controlStyleNum >= 2,
+                            controlStyleNum >= 2);
+                        break;
+                    case UI.InputController.ControlStyle.Classic:
+                        UI.MessageBoard.Show(
+                            "Move or Aim : L Stick\n" +
+                            "Pick or Charge : A\n" +
+                            "Dash : R Trigger\n" +
+                            "Stay : L Trigger",
                             PhotonNetwork.IsMasterClient,
                             controlStyleNum >= 2,
                             controlStyleNum >= 2);
@@ -405,7 +434,7 @@ namespace RPGM.Gameplay
 
             // リザルト表示
             UI.MessageBoard.Hide();
-            foreach(var player in PhotonNetwork.PlayerList)
+            foreach (var player in PhotonNetwork.PlayerList)
             {
                 bool you = false;
                 bool winner = false;
