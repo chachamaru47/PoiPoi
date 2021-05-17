@@ -280,17 +280,20 @@ namespace RPGM.UI
             model.player.onCharge = false;
             model.player.onFire = false;
 
-            Vector3 oldAimCommand = model.player.nextAimCommand;
+            Vector3 oldAimCommand = reserveAimCommand;
             Vector3 newAimCommand = Vector3.up * Input.GetAxis("AimVertical");
+            newAimCommand += Vector3.right * Input.GetAxis("AimHorizontal");
             if (reverse)
             {
                 newAimCommand *= -1;
             }
             model.player.nextAimCommand = newAimCommand;
+            reserveAimCommand = newAimCommand;
 
             model.player.isAiming = newAimCommand.magnitude > deadZone;
             model.player.onCharge = newAimCommand.magnitude > deadZone;
             model.player.offCharge = !model.player.onCharge;
+#if false
             if (model.player.isAiming)
             {
                 // 投げる瞬間にエイム入力を放してもエイムしていた方向に投げる為に保存
@@ -312,6 +315,7 @@ namespace RPGM.UI
                     model.player.nextAimCommand = model.player.nextMoveCommand;
                 }
             }
+#endif
             if (newAimCommand.sqrMagnitude < oldAimCommand.sqrMagnitude)
             {
                 if (Vector3.Distance(newAimCommand, oldAimCommand) > 0.5f)
