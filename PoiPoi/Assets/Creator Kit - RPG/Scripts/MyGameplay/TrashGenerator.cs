@@ -48,30 +48,45 @@ namespace RPGM.Gameplay
 
             for (int i = 0; i < num; i++)
             {
+                // 設定するアイテムデータを抽選
+                var data = LotItemData(trashDatas, total_weight);
+                if (data == null) { break; }
+
                 // 生成座標を決める
                 var pos = new Vector3(Random.Range(rect.x, rect.xMax), Random.Range(rect.y, rect.yMax), 0.0f);
                 // 生成
                 var item = Instantiate(itemBase, pos, Quaternion.identity);
                 item.gameObject.transform.SetParent(trashCollection.transform);
                 item.id = i + 1;
-
-                // 設定するアイテムデータを抽選
-                int lot = Random.Range(0, total_weight);
-                foreach (var data in trashDatas)
-                {
-                    if (lot < data.lotWeight)
-                    {
-                        item.data = data.trashData;
-                        break;
-                    }
-                    lot -= data.lotWeight;
-                }
+                item.data = data;
 
                 // 最後にアクティブ化
                 item.gameObject.SetActive(true);
 
                 itemList.Add(item.id, item);
             }
+        }
+
+        /// <summary>
+        /// ごみデータ抽選
+        /// </summary>
+        /// <param name="datas">ごみデータリスト</param>
+        /// <param name="totalWeight">重み合計</param>
+        /// <returns></returns>
+        private TrashData LotItemData(LotTrashData[] datas, int totalWeight)
+        {
+            if (totalWeight <= 0) { return null; }
+
+            int lot = Random.Range(0, totalWeight);
+            foreach (var data in datas)
+            {
+                if (lot < data.lotWeight)
+                {
+                    return data.trashData;
+                }
+                lot -= data.lotWeight;
+            }
+            return null;
         }
 
         /// <summary>

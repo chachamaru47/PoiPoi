@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace RPGM.UI
@@ -39,7 +41,7 @@ namespace RPGM.UI
             audioSource = GetComponent<AudioSource>();
             SetCursor(Gameplay.NetworkManager.IsOnlineMode ? GameMode.OnlineMode : GameMode.OfflineMode);
 
-            StartCoroutine(ModeSelectCoroutine());
+            ModeSelectCoroutine().Forget();
         }
 
         // Update is called once per frame
@@ -66,11 +68,11 @@ namespace RPGM.UI
         /// モード選択コルーチン
         /// </summary>
         /// <returns>IEnumerator</returns>
-        private IEnumerator ModeSelectCoroutine()
+        private async UniTaskVoid ModeSelectCoroutine()
         {
             FadeScreen.FadeIn(1.0f, Color.black);
 
-            while(!Input.GetButtonDown("Submit"))
+            while (!Input.GetButtonDown("Submit"))
             {
                 float vertical = Input.GetAxis("Vertical");
                 if (vertical > deadZone)
@@ -89,26 +91,24 @@ namespace RPGM.UI
                         SetCursor(GameMode.OnlineMode);
                     }
                 }
-                yield return null;
+                await UniTask.Yield(this.GetCancellationTokenOnDestroy());
             }
 
-            StartCoroutine(StartGameCoroutine());
-            yield break;
+            await StartGameCoroutine(this.GetCancellationTokenOnDestroy());
         }
 
         /// <summary>
         /// ゲームスタートコルーチン
         /// </summary>
         /// <returns>IEnumerator</returns>
-        private IEnumerator StartGameCoroutine()
+        private async UniTask StartGameCoroutine(CancellationToken cancellationToken)
         {
             audioSource.PlayOneShot(onDecide);
             FadeScreen.FadeOut(0.5f, Color.white);
-            yield return new WaitForSeconds(0.5f);
+            await UniTask.Delay(500, cancellationToken: cancellationToken);
 
             Gameplay.NetworkManager.IsOnlineMode = (cursorPos == GameMode.OnlineMode);
             UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
-            yield break;
         }
     }
 }

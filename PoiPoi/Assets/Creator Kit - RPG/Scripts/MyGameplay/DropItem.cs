@@ -1,4 +1,5 @@
-﻿using RPGM.Core;
+﻿using Cysharp.Threading.Tasks;
+using RPGM.Core;
 using RPGM.Gameplay;
 using RPGM.UI;
 using UnityEngine;
@@ -96,7 +97,7 @@ namespace RPGM.Gameplay
             // 投射開始位置を設定
             throwStartPos = transform.position;
             // 飛ばす処理開始
-            StartCoroutine(FlyingCoroutine(force));
+            FlyingCoroutine(force).Forget();
         }
 
         /// <summary>
@@ -126,8 +127,8 @@ namespace RPGM.Gameplay
         /// 飛ばす処理のコルーチン
         /// </summary>
         /// <param name="force">飛ばす力</param>
-        /// <returns>IEnumerator</returns>
-        private System.Collections.IEnumerator FlyingCoroutine(Vector2 force)
+        /// <returns>UniTaskVoid</returns>
+        private async UniTaskVoid FlyingCoroutine(Vector2 force)
         {
             // 故郷オブジェクトの子オブジェクトに戻す
             transform.SetParent(oldHome.transform);
@@ -187,7 +188,7 @@ namespace RPGM.Gameplay
                     }
                 }
 
-                yield return null;
+                await UniTask.Yield(this.GetCancellationTokenOnDestroy());
             }
 
             // 地面に着いた
@@ -208,8 +209,6 @@ namespace RPGM.Gameplay
                     model.cameraController.ResetFocus();
                 }
             }
-
-            yield break;
         }
     }
 }

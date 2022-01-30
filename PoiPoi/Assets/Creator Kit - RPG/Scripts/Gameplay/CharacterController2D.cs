@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using RPGM.Gameplay;
 using UnityEngine;
@@ -188,7 +190,7 @@ namespace RPGM.Gameplay
                 // アイテムサーチ
                 if (onPick)
                 {
-                    StartCoroutine(SearchCoroutine());
+                    SearchCoroutine(this.GetCancellationTokenOnDestroy()).Forget();
                 }
             }
             else
@@ -370,17 +372,23 @@ namespace RPGM.Gameplay
         /// <summary>
         /// アイテムサーチコルーチン
         /// </summary>
-        /// <returns>IEnumerator</returns>
-        private IEnumerator SearchCoroutine()
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        /// <returns>UniTaskVoid</returns>
+        private async UniTaskVoid SearchCoroutine(CancellationToken cancellationToken)
         {
             // Rigidbodyが寝てると当たり判定が機能しないので起こす
             rigidbody2D.WakeUp();
 
             // 一定時間サーチ用コライダーをオンにする
             searchCollider.enabled = true;
-            yield return new WaitForSeconds(0.1f);
-            searchCollider.enabled = false;
-            yield break;
+            try
+            {
+                await UniTask.Delay(100, cancellationToken: cancellationToken);
+            }
+            finally
+            {
+                searchCollider.enabled = false;
+            }
         }
 
         void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

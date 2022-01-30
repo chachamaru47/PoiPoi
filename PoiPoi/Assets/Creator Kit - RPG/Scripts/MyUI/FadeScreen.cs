@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace RPGM.UI
@@ -31,7 +33,7 @@ namespace RPGM.UI
             if (time > 0.0f)
             {
                 // フェード開始
-                StartCoroutine(instance.FadeCoroutine(startAlpha, endAlpha, time, color));
+                instance.FadeCoroutine(startAlpha, endAlpha, time, color, this.GetCancellationTokenOnDestroy()).Forget();
                 time = -1.0f;
             }
         }
@@ -42,32 +44,37 @@ namespace RPGM.UI
         /// <param name="startAlpha">開始アルファ値</param>
         /// <param name="endAlpha">終了アルファ値</param>
         /// <param name="time">フェード時間</param>
-        /// <returns>IEnumerator</returns>
-        private IEnumerator FadeCoroutine(float startAlpha, float endAlpha, float time, Color color)
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        /// <returns>UniTask</returns>
+        private async UniTask FadeCoroutine(float startAlpha, float endAlpha, float time, Color color, CancellationToken cancellationToken)
         {
             float elapsed_time = 0.0f;
             fade.enabled = true;
 
             // フェード時間をかけて線形補間
-            while(elapsed_time < time)
+            try
             {
-                color.a = Mathf.Lerp(startAlpha, endAlpha, elapsed_time / time);
-                fade.color = color;
-                yield return null;
-                elapsed_time += Time.deltaTime;
+                while (elapsed_time < time)
+                {
+                    color.a = Mathf.Lerp(startAlpha, endAlpha, elapsed_time / time);
+                    fade.color = color;
+                    await UniTask.Yield(cancellationToken);
+                    elapsed_time += Time.deltaTime;
+                }
             }
-
-            // フェード終了
-            if(endAlpha > 0.0f)
+            finally
             {
-                color.a = endAlpha;
-                fade.color = color;
+                // フェード終了
+                if (endAlpha > 0.0f)
+                {
+                    color.a = endAlpha;
+                    fade.color = color;
+                }
+                else
+                {
+                    fade.enabled = false;
+                }
             }
-            else
-            {
-                fade.enabled = false;
-            }
-            yield break;
         }
 
         /// <summary>

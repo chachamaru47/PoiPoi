@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using UnityEngine;
 
@@ -43,7 +45,7 @@ namespace RPGM.Gameplay
         /// <summary>
         /// Photonルームプロパティ：ゲーム開始フラグ
         /// </summary>
-        bool roomProperty_start
+        private bool roomProperty_start
         {
             get => (PhotonNetwork.CurrentRoom?.CustomProperties["Start"] is bool value) ? value : false;
             set
@@ -60,7 +62,7 @@ namespace RPGM.Gameplay
         /// <summary>
         /// Photonルームプロパティ：プラクティスモードフラグ
         /// </summary>
-        bool roomProperty_practice
+        private bool roomProperty_practice
         {
             get => (PhotonNetwork.CurrentRoom?.CustomProperties["Practice"] is bool value) ? value : false;
             set
@@ -74,6 +76,8 @@ namespace RPGM.Gameplay
             }
         }
 
+        private CancellationToken cancelToken => this.GetCancellationTokenOnDestroy();
+
         // Start is called before the first frame update
         void Start()
         {
@@ -82,7 +86,7 @@ namespace RPGM.Gameplay
             UI.Timer.SetTime(timer);
 
             // オープニングシーン開始
-            StartCoroutine(OpeningCoroutine());
+            OpeningCoroutine().Forget();
         }
 
         // Update is called once per frame
@@ -104,7 +108,7 @@ namespace RPGM.Gameplay
                         // ゲーム終了
                         timer = 0.0f;
                         // エンディングシーン開始
-                        StartCoroutine(EndingCoroutine());
+                        EndingCoroutine().Forget();
                     }
                     UI.Timer.SetTime(timer);
                 }
@@ -202,22 +206,22 @@ namespace RPGM.Gameplay
         /// <summary>
         /// オープニングシーンコルーチン
         /// </summary>
-        /// <returns>IEnumerator</returns>
-        private IEnumerator OpeningCoroutine()
+        /// <returns>UniTaskVoid</returns>
+        private async UniTaskVoid OpeningCoroutine()
         {
             GamePhase = GamePhaseType.Opening;
             UI.FadeScreen.FadeIn(1.0f, Color.white);
-            yield return new WaitForSeconds(1.5f);
+            await UniTask.Delay(1500, cancellationToken: cancelToken);
 
             // Photonがルームに入室するまで待つ
-            yield return new WaitUntil(() => PhotonNetwork.InRoom);
+            await UniTask.WaitUntil(() => PhotonNetwork.InRoom, cancellationToken: cancelToken);
 
             // プレイヤーのゲーム番号が決まるまでループ（他のプレイヤーと重複させないための処理）
             for (int i = 0; ; i = (i + 1) % NetworkManager.RoomMaxPlayers)
             {
                 // いったん設定して、その設定が返ってくるのを待つ
                 PhotonNetwork.LocalPlayer.SetGameNo(i);
-                yield return new WaitUntil(() => PhotonNetwork.LocalPlayer.GetGameNo() == i);
+                await UniTask.WaitUntil(() => PhotonNetwork.LocalPlayer.GetGameNo() == i, cancellationToken: cancelToken);
 
                 // 他に同じ番号を設定しているプレイヤーが居なければOK
                 if (!System.Array.Exists(PhotonNetwork.PlayerListOthers, p => p.GetGameNo() == i))
@@ -229,19 +233,12 @@ namespace RPGM.Gameplay
             }
 
             // ゲーム開始前の待機画面　オンラインの場合他のユーザーを待ったりする
-            bool lobbyWait = true;
-            bool lobbyResult = false;
-            StartCoroutine(LobbyCoroutine(r =>
-            {
-                lobbyResult = r;
-                lobbyWait = false;
-            }));
-            yield return new WaitWhile(() => lobbyWait);
+            bool lobbyResult = await LobbyCoroutine(cancelToken);
             if (!lobbyResult)
             {
                 // トップメニューに戻る
-                StartCoroutine(ReturnTopMenu());
-                yield break;
+                await ReturnTopMenu(cancelToken);
+                return;
             }
 
             // ランダムな座標に自身のアバター（ネットワークオブジェクト）を生成する
@@ -251,10 +248,10 @@ namespace RPGM.Gameplay
             model.player = player_obj.GetComponent<CharacterController2D>();
 
             UI.MessageBoard.Show("Let's ....");
-            yield return new WaitForSeconds(1.5f);
+            await UniTask.Delay(1500, cancellationToken: cancelToken);
 
             UI.MessageBoard.Show("Poi Poi !!!!");
-            yield return new WaitForSeconds(1.5f);
+            await UniTask.Delay(1500, cancellationToken: cancelToken);
 
             model.cameraController.SetDefaultFocus(model.player.transform);
             model.cameraController.ChangeInGameCamera();
@@ -272,18 +269,14 @@ namespace RPGM.Gameplay
             }
             UI.Timer.Show();
             GamePhase = GamePhaseType.InGame;
-            yield break;
         }
 
         /// <summary>
         /// ロビーシーンコルーチン
         /// </summary>
-        /// <param name="endCallback">
-        /// ロビー終了コールバック
-        /// ゲーム開始なら真、ゲームから抜けたら偽を返す
-        /// </param>
-        /// <returns>IEnumerator</returns>
-        private IEnumerator LobbyCoroutine(UnityEngine.Events.UnityAction<bool> endCallback)
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        /// <returns>UniTask(bool=ゲーム開始なら真、ゲームから抜けたら偽)</returns>
+        private async UniTask<bool> LobbyCoroutine(CancellationToken cancellationToken)
         {
             float horizontal = 0.0f;
             int controlStyleNum = System.Enum.GetValues(typeof(UI.InputController.ControlStyle)).Length;
@@ -321,7 +314,7 @@ namespace RPGM.Gameplay
                         UI.MessageBoard.Show(
                             "Move : L Stick\n" +
                             "Pick: R Trigger\n" +
-                            "Charge and Aim: R Stick\n" + 
+                            "Charge and Aim: R Stick\n" +
                             "(Aim Reverse)",
                             PhotonNetwork.IsMasterClient,
                             controlStyleNum >= 2,
@@ -399,11 +392,10 @@ namespace RPGM.Gameplay
                 if (Input.GetButtonDown("Cancel"))
                 {
                     // ゲームから抜ける
-                    endCallback?.Invoke(false);
-                    yield break;
+                    return false;
                 }
 
-                yield return null;
+                await UniTask.Yield(cancellationToken);
             }
 
             // ロビーを閉じてしゲーム開始
@@ -411,15 +403,14 @@ namespace RPGM.Gameplay
             {
                 UI.Lobby.Hide();
             }
-            endCallback?.Invoke(true);
-            yield break;
+            return true;
         }
 
         /// <summary>
         /// エンディングシーンコルーチン
         /// </summary>
-        /// <returns>IEnumerator</returns>
-        private IEnumerator EndingCoroutine()
+        /// <returns>UniTaskVoid</returns>
+        private async UniTaskVoid EndingCoroutine()
         {
             GamePhase = GamePhaseType.Ending;
             for (int i = 0; i < model.scores.Length; i++)
@@ -430,7 +421,7 @@ namespace RPGM.Gameplay
             UI.MessageBoard.Show("Finish !!!!");
             model.cameraController.SetOutGameCameraFocus(model.player.transform);
             model.cameraController.ChangeOutGameCamera();
-            yield return new WaitForSeconds(3.0f);
+            await UniTask.Delay(3000, cancellationToken: cancelToken);
 
             // リザルト表示
             UI.MessageBoard.Hide();
@@ -448,43 +439,42 @@ namespace RPGM.Gameplay
                 UI.Result.ShowPlayer(player.GetGameNo(), you, player.GetScore(), player.GetRecord(), winner, longest);
             }
             UI.Result.Show();
-            yield return new WaitForSeconds(0.5f);
+            await UniTask.Delay(500, cancellationToken: cancelToken);
 
-            yield return new WaitUntil(() => Input.GetButtonDown("Submit"));
+            await UniTask.WaitUntil(() => Input.GetButtonDown("Submit"), cancellationToken: cancelToken);
 
             UI.Result.Hide();
-            yield return new WaitForSeconds(1.0f);
+            await UniTask.Delay(1000, cancellationToken: cancelToken);
 
             UI.FadeScreen.FadeOut(1.0f, Color.black);
-            yield return new WaitForSeconds(1.5f);
+            await UniTask.Delay(1500, cancellationToken: cancelToken);
 
             // トップメニューに戻る
-            StartCoroutine(ReturnTopMenu());
-            yield break;
+            await ReturnTopMenu(cancelToken);
         }
 
         /// <summary>
         /// トップメニューに戻るコルーチン
         /// </summary>
-        /// <returns></returns>
-        private IEnumerator ReturnTopMenu()
+        /// <param name="cancellationToken">キャンセルトークン</param>
+        /// <returns>UniTask</returns>
+        private async UniTask ReturnTopMenu(CancellationToken cancellationToken)
         {
             if (PhotonNetwork.OfflineMode)
             {
                 // オフラインモードから切断
                 PhotonNetwork.OfflineMode = false;
-                yield return new WaitUntil(() => !PhotonNetwork.IsConnected);
+                await UniTask.WaitUntil(() => !PhotonNetwork.IsConnected, cancellationToken: cancellationToken);
             }
             else
             {
                 // サーバーから切断
                 PhotonNetwork.Disconnect();
-                yield return new WaitUntil(() => !PhotonNetwork.IsConnected);
+                await UniTask.WaitUntil(() => !PhotonNetwork.IsConnected, cancellationToken: cancellationToken);
             }
 
             // トップシーンのロード
             UnityEngine.SceneManagement.SceneManager.LoadScene("TopScene");
-            yield break;
         }
     }
 }
